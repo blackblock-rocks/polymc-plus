@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "blackblock-example",
+  "id": "polymc-plus",
   "version": "${version}",
 
-  "name": "Blackblock Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "PolyMC-Plus",
+  "description": "An addon mod for PolyMC",
   "authors": [
-    "Me!"
+    "Jelle De Loecker"
   ],
   "contact": {
     "homepage": "https://blackblock.rocks/",
-    "sources": "https://github.com/skerit/minecraft-mod-skeleton"
+    "sources": "https://github.com/skerit/polymcplus"
   },
 
   "license": "GPL3",
@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "rocks.blackblock.example.ExampleMod"
+      "rocks.blackblock.polymcplus.PolyMcPlus"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "polymcplus.mixins.json"
   ],
 
   "depends": {
