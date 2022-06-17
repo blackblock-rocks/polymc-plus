@@ -121,6 +121,20 @@ public class BlockPolyPlusGenerator {
             } catch (BlockStateManager.StateLimitReachedException ignored) {}
         }
 
+        // == NO COLLISION BLOCKS ==
+        if (collisionShape.isEmpty() && !(moddedBlock instanceof WallBlock)) {
+            var outlineShape = moddedState.getOutlineShape(fakeWorld, BlockPos.ORIGIN);
+
+            if (moddedBlock instanceof NetherPortalBlock) {
+                try {
+                    isUniqueCallback.set(true);
+                    return manager.requestBlockState(PolyPlusBlockStateProfile.NO_COLLISION_TRANSLUCENT_PROFILE.and(
+                            state -> moddedState.getFluidState().equals(state.getFluidState())
+                    ));
+                } catch (BlockStateManager.StateLimitReachedException ignored) {}
+            }
+        }
+
         // Fall back to the basic PolyMc implementation
         return BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
     }
