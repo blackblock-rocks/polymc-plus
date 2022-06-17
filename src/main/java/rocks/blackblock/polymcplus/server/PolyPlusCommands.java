@@ -44,13 +44,6 @@ public class PolyPlusCommands {
                                             compressGameMap("resource_polyplus", "resource_polyplus.zip");
                                             commandSource.info("Zipped Polyvalent resource pack.");
 
-                                            commandSource.info("Generating PolyMC resource pack...");
-                                            ResourcePackGenerator.generate(PolyMc.getMainMap(), "resource_polymc", logger);
-
-                                            commandSource.info("Generated PolyMC resource pack. Zipping...");
-                                            compressGameMap("resource_polymc", "resource_polymc.zip");
-                                            commandSource.info("Zipped PolyMC resource pack.");
-
                                         } catch (Exception e) {
                                             commandSource.error("An error occurred whilst trying to generate the resource pack! Please check the console.");
                                             e.printStackTrace();
