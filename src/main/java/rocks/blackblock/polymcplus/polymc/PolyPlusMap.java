@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import io.github.theepicblock.polymc.PolyMc;
+import io.github.theepicblock.polymc.api.DebugInfoProvider;
 import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.SharedValuesKey;
@@ -14,6 +16,7 @@ import io.github.theepicblock.polymc.api.item.ItemLocation;
 import io.github.theepicblock.polymc.api.item.ItemPoly;
 import io.github.theepicblock.polymc.api.item.ItemTransformer;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.impl.Util;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
 import io.github.theepicblock.polymc.impl.resource.ResourcePackImplementation;
@@ -35,12 +38,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -343,6 +348,44 @@ public class PolyPlusMap implements PolyMap {
 
     @Override
     public String dumpDebugInfo() {
-        return null;
+        StringBuilder builder = new StringBuilder();
+        builder.append("###########\n## ITEMS ##\n###########\n");
+        this.itemPolys
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(item -> item.getKey().getTranslationKey()))
+                .forEach(entry -> {
+                    var item = entry.getKey();
+                    var poly = entry.getValue();
+                    addDebugProviderToDump(builder, item, item.getTranslationKey(), poly);
+                });
+        builder.append("############\n## BLOCKS ##\n############\n");
+        this.blockPolys
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(block -> block.getKey().getTranslationKey()))
+                .forEach(entry -> {
+                    var block = entry.getKey();
+                    var poly = entry.getValue();
+                    addDebugProviderToDump(builder, block, block.getTranslationKey(), poly);
+                });
+        return builder.toString();
+    }
+
+    private static <T> void addDebugProviderToDump(StringBuilder b, T object, String key, DebugInfoProvider<T> poly) {
+        b.append(Util.expandTo(key, 45));
+        b.append(" --> ");
+        b.append(Util.expandTo(poly.getClass().getName(), 60));
+        try {
+            String info = poly.getDebugInfo(object);
+            if (info != null) {
+                b.append("|");
+                b.append(info);
+            }
+        } catch (Exception e) {
+            PolyMcPlus.LOGGER.info(String.format("Error whilst getting debug info from '%s' which is registered to '%s'", poly.getClass().getName(), key));
+            e.printStackTrace();
+        }
+        b.append("\n");
     }
 }

@@ -2,7 +2,6 @@ package rocks.blackblock.polymcplus.polymc;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.item.ItemTransformer;
 
@@ -23,7 +22,7 @@ public class PolyPlusRegistry extends PolyRegistry {
      * @since    0.1.0
      */
     @Override
-    public PolyMap build() {
+    public PolyPlusMap build() {
         return new PolyPlusMap(
                 ImmutableMap.copyOf(itemPolys),
                 globalItemPolys.toArray(new ItemTransformer[0]),

@@ -4,9 +4,9 @@
   "package": "rocks.blackblock.polymcplus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ServerStartMixin"
   ],
   "client": [
-
   ],
   "injectors": {
     "defaultRequire": 1
