@@ -3,17 +3,15 @@ package rocks.blackblock.polymcplus.block;
 import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateProfile;
-import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.ConnectingBlock;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.util.function.Predicate;
-
-import static io.github.theepicblock.polymc.api.block.BlockStateProfile.hasBooleanDirection;
 
 /**
  * Blockstate filters for Mushroom blocks
@@ -225,5 +223,15 @@ public class MushroomFilters {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the BlockState has the given Direction property enabled.
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     */
+    public static boolean hasBooleanDirection(BlockState state, Direction direction) {
+        BooleanProperty booleanProperty = ConnectingBlock.FACING_PROPERTIES.get(direction);
+        return state.contains(booleanProperty) && state.get(booleanProperty);
     }
 }

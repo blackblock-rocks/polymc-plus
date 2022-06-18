@@ -32,4 +32,13 @@ public class PolyPlusRegistry extends PolyRegistry {
                 ImmutableList.copyOf(sharedValues.entrySet().stream().map((entry) -> entry.getKey().createResources(entry.getValue())).filter(Objects::nonNull).iterator()));
     }
 
+    /**
+     * Return a readable string of this instance
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.1.0
+     */
+    public String toString() {
+        return "PolyPlusRegistry{}";
+    }
 }
