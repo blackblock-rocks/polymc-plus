@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 
 public class PolyPlusBlockStateProfile {
 
+    // Filters and consumers
     private static final Predicate<BlockState> TRIPWIRE_THIN_FILTER = PolyPlusBlockStateProfile::isThinTripwireUsable;
     private static final Predicate<BlockState> TRIPWIRE_THICK_FILTER = PolyPlusBlockStateProfile::isThickTripwireUsable;
 
@@ -48,6 +49,9 @@ public class PolyPlusBlockStateProfile {
     public static final BlockStateProfile NO_COLLISION_TRANSLUCENT_PROFILE = BlockStateProfile.combine("translucent blocks without collisions", TRIPWIRE_THICK_PROFILE, TRIPWIRE_THIN_PROFILE);
     public static final BlockStateProfile NO_COLLISION_LOW_PROFILE = BlockStateProfile.combine("blocks with a low profile", TRIPWIRE_THIN_PROFILE, TRIPWIRE_THICK_PROFILE);
 
+    // Wall states
+    public static final BlockStateProfile WALL_X_PROFILE = new BlockStateProfile("wall_x", WallFilters.WALL_BLOCKS, WallFilters.WALL_X_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
+    public static final BlockStateProfile WALL_Z_PROFILE = new BlockStateProfile("wall_z", WallFilters.WALL_BLOCKS, WallFilters.WALL_Z_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
 
     /**
      * Is the given piece of string usable?

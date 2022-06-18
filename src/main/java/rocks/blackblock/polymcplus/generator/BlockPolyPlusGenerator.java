@@ -3,16 +3,19 @@ package rocks.blackblock.polymcplus.generator;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateManager;
+import io.github.theepicblock.polymc.api.block.BlockStateProfile;
 import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
 import io.github.theepicblock.polymc.impl.poly.block.FunctionBlockStatePoly;
 import io.github.theepicblock.polymc.impl.poly.block.SimpleReplacementPoly;
 import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
+import rocks.blackblock.polymcplus.block.WallFilters;
 
 /**
  * Class to automatically generate {@link BlockPoly}s for {@link Block}s
@@ -131,6 +134,25 @@ public class BlockPolyPlusGenerator {
                     ));
                 } catch (BlockStateManager.StateLimitReachedException ignored) {}
             }
+        }
+
+        // See if this block is wall-like
+        Direction.Axis wall_axis = WallFilters.getWallAxis(collisionShape, moddedState);
+
+        if (wall_axis == Direction.Axis.X) {
+            try {
+                isUniqueCallback.set(true);
+                return manager.requestBlockState(PolyPlusBlockStateProfile.WALL_X_PROFILE.and(
+                        state -> moddedState.getFluidState().equals(state.getFluidState())
+                ));
+            } catch (BlockStateManager.StateLimitReachedException ignored) {}
+        } else if (wall_axis == Direction.Axis.Z) {
+            try {
+                isUniqueCallback.set(true);
+                return manager.requestBlockState(PolyPlusBlockStateProfile.WALL_Z_PROFILE.and(
+                        state -> moddedState.getFluidState().equals(state.getFluidState())
+                ));
+            } catch (BlockStateManager.StateLimitReachedException ignored) {}
         }
 
         // Fall back to the basic PolyMc implementation
