@@ -20,6 +20,10 @@ repositories {
 	flatDir {
 		dirs '../PolyMc/build/libs/'
 	}
+
+	flatDir {
+		dirs '../polyvalent/build/libs/'
+	}
 }
 
 dependencies {
@@ -37,6 +41,7 @@ dependencies {
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 
 	modImplementation "com.github.TheEpicBlock:PolyMc:${project.polymc_version}"
+	modImplementation ("rocks.blackblock:polyvalent:${project.polyvalent_version}")
 }
 
 processResources {

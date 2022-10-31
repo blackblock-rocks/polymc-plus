@@ -3,7 +3,6 @@ package rocks.blackblock.polymcplus.generator;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateManager;
-import io.github.theepicblock.polymc.api.block.BlockStateProfile;
 import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
 import io.github.theepicblock.polymc.impl.poly.block.FunctionBlockStatePoly;
@@ -16,6 +15,11 @@ import net.minecraft.util.shape.VoxelShapes;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
 import rocks.blackblock.polymcplus.block.WallFilters;
+import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
+import rocks.blackblock.polyvalent.polymc.PolyvalentBlockPolyGenerator;
+import rocks.blackblock.polyvalent.polymc.PolyvalentRegistry;
+
+import java.util.function.BiFunction;
 
 /**
  * Class to automatically generate {@link BlockPoly}s for {@link Block}s
@@ -100,12 +104,14 @@ public class BlockPolyPlusGenerator {
             }
 
             // If the modded block is metal-like, try to use vanilla metal blocks
+            // I actually don't really like this, waxed blocks interact with axes
+            /*
             if (moddedMaterial.equals(Material.METAL)) {
                 try {
                     isUniqueCallback.set(true);
                     return manager.requestBlockState(PolyPlusBlockStateProfile.FULL_BLOCK_METAL_PROFILE);
                 } catch (BlockStateManager.StateLimitReachedException ignored) {}
-            }
+            }*/
 
             // If the modded block is grass-like, try to use vanilla grass blocks
             if (moddedBlock instanceof GrassBlock) {
@@ -157,5 +163,27 @@ public class BlockPolyPlusGenerator {
 
         // Fall back to the basic PolyMc implementation
         return BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
+    }
+
+    /**
+     * Get a blockstate registration provider
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.1.0
+     */
+    public static BiFunction<BlockState, BooleanContainer, BlockState> getBlockStateRegistrationProvider(PolyRegistry registry) {
+
+        BlockStateManager manager = registry.getSharedValues(BlockStateManager.KEY);
+        BiFunction<BlockState, BooleanContainer, BlockState> registrationProvider;
+
+        if (registry instanceof PolyvalentRegistry) {
+            registrationProvider = (state, isUniqueCallback) -> PolyvalentBlockPolyGenerator.registerClientState(state, isUniqueCallback, manager);
+        } else if (registry instanceof PolyPlusRegistry) {
+            registrationProvider = (state, isUniqueCallback) -> BlockPolyPlusGenerator.registerClientState(state, isUniqueCallback, manager);
+        } else {
+            registrationProvider = (state, isUniqueCallback) -> BlockPolyGenerator.registerClientState(state, isUniqueCallback, manager);
+        }
+
+        return registrationProvider;
     }
 }

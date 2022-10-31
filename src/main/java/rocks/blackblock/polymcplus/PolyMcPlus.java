@@ -5,7 +5,6 @@ import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
