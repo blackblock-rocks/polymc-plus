@@ -2,15 +2,26 @@ package rocks.blackblock.polymcplus.server;
 
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.theepicblock.polymc.PolyMc;
+import io.github.theepicblock.polymc.api.wizard.VItemFrame;
 import io.github.theepicblock.polymc.impl.misc.PolyDumper;
 import io.github.theepicblock.polymc.impl.misc.logging.CommandSourceLogger;
 import io.github.theepicblock.polymc.impl.misc.logging.ErrorTrackerWrapper;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
+import io.github.theepicblock.polymc.impl.poly.wizard.AbstractVirtualEntity;
+import io.github.theepicblock.polymc.impl.poly.wizard.SinglePlayerView;
 import io.github.theepicblock.polymc.impl.resource.ResourcePackGenerator;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.Items;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import rocks.blackblock.polymcplus.PolyMcPlus;
+import rocks.blackblock.polymcplus.wizard.VArmorStand;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -72,7 +83,57 @@ public class PolyPlusCommands {
                                         logger.info("Finished generating poly dump");
                                         return Command.SINGLE_SUCCESS;
                                     }))
-                    ));
+                    )
+                    .then(literal("spawntest")
+                            .then(CommandManager.argument("type", StringArgumentType.string())
+                                    .executes(context -> {
+
+                                        ServerCommandSource source = context.getSource();
+                                        ServerPlayerEntity player = source.getPlayer();
+
+                                        if (player == null) {
+                                            source.sendError(Text.literal("You must be a player to execute this command."));
+                                            return 0;
+                                        }
+
+                                        SinglePlayerView consumer = new SinglePlayerView(player);
+
+                                        String scope_slug = StringArgumentType.getString(context, "type");
+
+                                        for (int i = 0; i < 500; i++) {
+                                            AbstractVirtualEntity entity;
+
+                                            if (scope_slug.equals("armorstand")) {
+                                                entity = new VArmorStand();
+                                            } else if (scope_slug.equals("itemframe")) {
+                                                entity = new VItemFrame();
+                                            } else {
+                                                source.sendError(Text.literal("Type must be 'armorstand' or 'itemframe'."));
+                                                return 0;
+                                            }
+
+
+                                            entity.spawn(consumer, player.getPos());
+                                            entity.setNoGravity(consumer, true);
+
+                                            if (entity instanceof VArmorStand vArmorStand) {
+                                                vArmorStand.makeInvisible(consumer);
+                                                vArmorStand.sendArmorStandFlags(consumer, false, false, false, true);
+                                                vArmorStand.sendSingleSlot(consumer, EquipmentSlot.HEAD, Items.STONE.getDefaultStack());
+                                                vArmorStand.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                                            } else if (entity instanceof VItemFrame vItemFrame) {
+                                                //vItemFrame.makeInvisible(consumer);
+                                                vItemFrame.sendItemStack(consumer, Items.STONE.getDefaultStack());
+                                                vItemFrame.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                                            }
+                                        }
+
+                                        return 1;
+                                    })
+                            )
+
+                    )
+            );
         });
     }
 

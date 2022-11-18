@@ -47,6 +47,7 @@ public class PolyPlusBlockStateProfile {
     // @TODO: Dripleaf blocks have a visually random positioning
     public static final BlockStateProfile NO_COLLISION_OPAQUE_PROFILE = BlockStateProfile.combine("opaque blocks without collisions", BlockStateProfile.KELP_SUB_PROFILE, BlockStateProfile.SAPLING_SUB_PROFILE, BlockStateProfile.OPEN_FENCE_GATE_PROFILE, BlockStateProfile.SMALL_DRIPLEAF_SUB_PROFILE);
     public static final BlockStateProfile NO_COLLISION_TRANSLUCENT_PROFILE = BlockStateProfile.combine("translucent blocks without collisions", TRIPWIRE_THICK_PROFILE, TRIPWIRE_THIN_PROFILE);
+    public static final BlockStateProfile NO_COLLISION_LOW_TRANSLUCENT_PROFILE = BlockStateProfile.combine("translucent blocks without collisions with a low profile", TRIPWIRE_THIN_PROFILE, TRIPWIRE_THICK_PROFILE);
     public static final BlockStateProfile NO_COLLISION_LOW_PROFILE = BlockStateProfile.combine("blocks with a low profile", TRIPWIRE_THIN_PROFILE, TRIPWIRE_THICK_PROFILE);
 
     // Wall states

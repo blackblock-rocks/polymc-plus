@@ -5,7 +5,6 @@ import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateManager;
 import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
-import io.github.theepicblock.polymc.impl.poly.block.FunctionBlockStatePoly;
 import io.github.theepicblock.polymc.impl.poly.block.SimpleReplacementPoly;
 import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
@@ -13,11 +12,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import rocks.blackblock.polymcplus.PolyMcPlus;
+import rocks.blackblock.polymcplus.block.FallbackItemBlockPoly;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
 import rocks.blackblock.polymcplus.block.WallFilters;
+import rocks.blackblock.polymcplus.compatibility.PolyCompatibility;
+import rocks.blackblock.polymcplus.compatibility.PolyvalentCompatibility;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
-import rocks.blackblock.polyvalent.polymc.PolyvalentBlockPolyGenerator;
-import rocks.blackblock.polyvalent.polymc.PolyvalentRegistry;
 
 import java.util.function.BiFunction;
 
@@ -28,6 +28,8 @@ import java.util.function.BiFunction;
  * @since    0.1.0
  */
 public class BlockPolyPlusGenerator {
+
+    public static BlockState DEFAULT_STONE = Blocks.STONE.getDefaultState();
 
     /**
      * Generates the most suitable {@link BlockPoly} and directly adds it to the {@link PolyRegistry}
@@ -48,7 +50,7 @@ public class BlockPolyPlusGenerator {
      * Generates the most suitable {@link BlockPoly} for a given {@link Block}
      */
     public static BlockPoly generatePoly(Block block, PolyRegistry registry) {
-        return new FunctionBlockStatePoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY)));
+        return new FallbackItemBlockPoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY)), registry);
     }
 
     /**
@@ -132,6 +134,22 @@ public class BlockPolyPlusGenerator {
         if (collisionShape.isEmpty() && !(moddedBlock instanceof WallBlock)) {
             var outlineShape = moddedState.getOutlineShape(fakeWorld, BlockPos.ORIGIN);
 
+            if (moddedBlock instanceof RailBlock) {
+                try {
+                    isUniqueCallback.set(true);
+                    return manager.requestBlockState(PolyPlusBlockStateProfile.NO_COLLISION_LOW_PROFILE.and(
+                            state -> moddedState.getFluidState().equals(state.getFluidState())
+                    ));
+                } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+                try {
+                    isUniqueCallback.set(true);
+                    return manager.requestBlockState(PolyPlusBlockStateProfile.NO_COLLISION_LOW_TRANSLUCENT_PROFILE.and(
+                            state -> moddedState.getFluidState().equals(state.getFluidState())
+                    ));
+                } catch (BlockStateManager.StateLimitReachedException ignored) {}
+            }
+
             if (moddedBlock instanceof NetherPortalBlock) {
                 try {
                     isUniqueCallback.set(true);
@@ -162,7 +180,14 @@ public class BlockPolyPlusGenerator {
         }
 
         // Fall back to the basic PolyMc implementation
-        return BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
+        BlockState result = BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
+
+        if (result == DEFAULT_STONE) {
+            System.out.println(" -- Default stone! Returning null for " + moddedState);
+            return null;
+        }
+
+        return result;
     }
 
     /**
@@ -176,8 +201,8 @@ public class BlockPolyPlusGenerator {
         BlockStateManager manager = registry.getSharedValues(BlockStateManager.KEY);
         BiFunction<BlockState, BooleanContainer, BlockState> registrationProvider;
 
-        if (registry instanceof PolyvalentRegistry) {
-            registrationProvider = (state, isUniqueCallback) -> PolyvalentBlockPolyGenerator.registerClientState(state, isUniqueCallback, manager);
+        if (PolyCompatibility.hasPolyvalent() && PolyvalentCompatibility.isPolyvalentRegistry(registry)) {
+            registrationProvider = (state, isUniqueCallback) -> PolyvalentCompatibility.registerClientState(state, isUniqueCallback, manager);
         } else if (registry instanceof PolyPlusRegistry) {
             registrationProvider = (state, isUniqueCallback) -> BlockPolyPlusGenerator.registerClientState(state, isUniqueCallback, manager);
         } else {

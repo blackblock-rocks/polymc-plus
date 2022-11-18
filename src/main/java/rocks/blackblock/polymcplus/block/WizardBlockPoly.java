@@ -4,7 +4,6 @@ import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.wizard.Wizard;
 import io.github.theepicblock.polymc.api.wizard.WizardInfo;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
-import io.github.theepicblock.polymc.impl.poly.block.FunctionBlockStatePoly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import rocks.blackblock.polymcplus.generator.BlockPolyPlusGenerator;
@@ -18,7 +17,7 @@ import java.util.function.BiFunction;
  * @author   Jelle De Loecker   <jelle@elevenways.be>
  * @since    0.2.0
  */
-public class WizardBlockPoly extends FunctionBlockStatePoly {
+public class WizardBlockPoly extends PlusFunctionBlockStatePoly {
 
     // The function that will actually create the wizard
     private final WizardProvider wizard_provider;
@@ -64,4 +63,43 @@ public class WizardBlockPoly extends FunctionBlockStatePoly {
 
         registry.registerBlockPoly(modded_block, wizardBlockPoly);
     }
+
+    /**
+     * Convenient static method to actually register a block as having a Wizard
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public static void registerBlockWizard(Block modded_block, BlockState simple_replacement, PolyRegistry registry, WizardProvider wizard_provider) {
+
+        WizardSimpleBlockPoly wizardSimpleBlockPoly = new WizardSimpleBlockPoly(simple_replacement, wizard_provider);
+
+        registry.registerBlockPoly(modded_block, wizardSimpleBlockPoly);
+    }
+
+    /**
+     * Convenient static method to actually register a block as having a Wizard
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public static void registerBlockWizard(Block modded_block, Block retaining_replacement, PolyRegistry registry, WizardProvider wizard_provider) {
+
+        WizardRetainingBlockPoly wizard_poly = new WizardRetainingBlockPoly(retaining_replacement, wizard_provider);
+
+        registry.registerBlockPoly(modded_block, wizard_poly);
+    }
+
+    /**
+     * Register as an item block
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public static void registerItemBlock(Block modded_block, PolyRegistry registry) {
+        ItemBlockPoly item_block_poly = new ItemBlockPoly(modded_block, registry);
+        registry.registerBlockPoly(modded_block, item_block_poly);
+    }
+
+
 }
