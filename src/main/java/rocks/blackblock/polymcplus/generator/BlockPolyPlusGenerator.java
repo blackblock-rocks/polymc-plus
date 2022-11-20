@@ -54,6 +54,28 @@ public class BlockPolyPlusGenerator {
     }
 
     /**
+     * Get the collision shape of a state
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public static VoxelShape getCollisionShape(BlockState modded_state) {
+
+        BlockPolyGenerator.FakedWorld fake_world = new BlockPolyGenerator.FakedWorld(modded_state);
+        VoxelShape collision_shape;
+
+        try {
+            collision_shape = modded_state.getCollisionShape(fake_world, BlockPos.ORIGIN);
+        } catch (Exception e) {
+            PolyMcPlus.LOGGER.warn("Failed to get collision shape for " + modded_state);
+            e.printStackTrace();
+            collision_shape = VoxelShapes.UNBOUNDED;
+        }
+
+        return collision_shape;
+    }
+
+    /**
      * Get the most suitable client-side BlockState to use for the given modded BlockState.
      * This method uses some custom logic, and will fall back to PolyMC's native implementation when nothing is found.
      *
@@ -72,14 +94,7 @@ public class BlockPolyPlusGenerator {
         BlockPolyGenerator.FakedWorld fakeWorld = new BlockPolyGenerator.FakedWorld(moddedState);
 
         //Get the state's collision shape.
-        VoxelShape collisionShape;
-        try {
-            collisionShape = moddedState.getCollisionShape(fakeWorld, BlockPos.ORIGIN);
-        } catch (Exception e) {
-            PolyMcPlus.LOGGER.warn("Failed to get collision shape for " + moddedState);
-            e.printStackTrace();
-            collisionShape = VoxelShapes.UNBOUNDED;
-        }
+        VoxelShape collisionShape = getCollisionShape(moddedState);
 
         boolean isOpaque = moddedState.isOpaque();
 
