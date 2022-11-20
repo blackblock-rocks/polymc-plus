@@ -97,7 +97,17 @@ public class WizardBlockPoly extends PlusFunctionBlockStatePoly {
      * @since    0.2.0
      */
     public static void registerItemBlock(Block modded_block, PolyRegistry registry) {
-        ItemBlockPoly item_block_poly = new ItemBlockPoly(modded_block, registry);
+        registerItemBlock(modded_block, registry, null);
+    }
+
+    /**
+     * Register as an item block
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public static void registerItemBlock(Block modded_block, PolyRegistry registry, String collision_type) {
+        ItemBlockPoly item_block_poly = new ItemBlockPoly(modded_block, registry, collision_type);
         registry.registerBlockPoly(modded_block, item_block_poly);
     }
 

@@ -1,7 +1,5 @@
 package rocks.blackblock.polymcplus.block;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.errorprone.annotations.Immutable;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
@@ -18,12 +16,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.shape.VoxelShape;
+import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.wizard.ItemBlockWizard;
 
 import java.util.*;
@@ -47,8 +45,20 @@ public class ItemBlockPoly implements BlockPoly {
     protected final Map<BlockState, ThreadLocal<ItemStack>> states_cached_items;
     protected final Block modded_block;
     protected final Identifier block_id;
+    protected PolyPlusRegistry poly_plus_registry = null;
 
     protected final BlockState barrier_state = Blocks.BARRIER.getDefaultState();
+    protected final String preferred_collision_type;
+
+    /**
+     * Initialize the ItemBlockPoly for all the states of the given block
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public ItemBlockPoly(Block modded_block, PolyRegistry registry, String collision_type) {
+        this(modded_block.getStateManager().getStates(), registry, collision_type);
+    }
 
     /**
      * Initialize the ItemBlockPoly for all the states of the given block
@@ -57,7 +67,7 @@ public class ItemBlockPoly implements BlockPoly {
      * @since    0.2.0
      */
     public ItemBlockPoly(Block modded_block, PolyRegistry registry) {
-        this(modded_block.getStateManager().getStates(), registry);
+        this(modded_block, registry, null);
     }
 
     /**
@@ -67,6 +77,23 @@ public class ItemBlockPoly implements BlockPoly {
      * @since    0.2.0
      */
     public ItemBlockPoly(List<BlockState> modded_states, PolyRegistry registry) {
+        this(modded_states, registry, null);
+    }
+
+    /**
+     * Initialize the ItemBlockPoly for all the given states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public ItemBlockPoly(List<BlockState> modded_states, PolyRegistry registry, String collision_type) {
+
+        if (registry instanceof PolyPlusRegistry poly_plus_registry) {
+            this.poly_plus_registry = poly_plus_registry;
+        }
+
+        this.preferred_collision_type = collision_type;
+
         this.states_cmd_values = new HashMap<>();
         this.states_client_items = new HashMap<>();
         this.states_cached_items = new HashMap<>();
@@ -90,8 +117,6 @@ public class ItemBlockPoly implements BlockPoly {
         // We need the blockstate json info, because we can re-use models that only need rotating
         JBlockState modded_block_state = modded_resources.getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
 
-        System.out.println("Processing mdoded states of " + this.block_id);
-
         for (BlockState modded_state : modded_states) {
 
             ItemBlockStateInfo info = new ItemBlockStateInfo(modded_state, this);
@@ -104,9 +129,6 @@ public class ItemBlockPoly implements BlockPoly {
             String model = best_variant.model();
             ItemCMD item_cmd = null;
 
-            System.out.println(" -- Best variant model for " + modded_state + " is ...");
-            System.out.println("    -- '" + model + "'");
-
             if (this.model_to_cmd.containsKey(model)) {
                 item_cmd = this.model_to_cmd.get(model);
             } else {
@@ -116,8 +138,6 @@ public class ItemBlockPoly implements BlockPoly {
                 item_cmd = new ItemCMD(client_item, cmd_value);
                 this.model_to_cmd.put(model, item_cmd);
             }
-
-            System.out.println("    -- ItemCMD is " + item_cmd);
 
             info.setClientItem(item_cmd);
             info.setX(x);
@@ -134,7 +154,14 @@ public class ItemBlockPoly implements BlockPoly {
      * @since    0.2.0
      */
     @Override
-    public BlockState getClientBlock(BlockState input) {
+    public BlockState getClientBlock(BlockState modded_state) {
+
+        ItemBlockStateInfo info = this.states.get(modded_state);
+
+        if (info != null) {
+            return info.getClientCollisionState();
+        }
+
         return barrier_state;
     }
 
@@ -157,11 +184,7 @@ public class ItemBlockPoly implements BlockPoly {
      */
     @Override
     public Wizard createWizard(WizardInfo wizard_info) {
-
         ItemBlockStateInfo info = this.states.get(wizard_info.getBlockState());
-
-        System.out.println("Creating ItemBlockPoly wizard!");
-
         return new ItemBlockWizard(info, wizard_info);
     }
 
@@ -196,8 +219,6 @@ public class ItemBlockPoly implements BlockPoly {
             if (modded_variants == null) {
                 continue;
             }
-
-            System.out.println("Importing requirements for " + modded_state + " - " + modded_variants);
 
             // Make sure these block models are imported: the item will use these models
             pack.importRequirements(modded_resources, modded_variants, logger);
@@ -338,6 +359,12 @@ public class ItemBlockPoly implements BlockPoly {
         // The calculated yaw
         protected int yaw;
 
+        // The client collision blockstate
+        protected BlockState client_collision_state = null;
+
+        // The preferred collision shape to use
+        protected VoxelShape preferred_collision_shape = null;
+
         /**
          * Initialize this instance
          *
@@ -347,6 +374,7 @@ public class ItemBlockPoly implements BlockPoly {
         public ItemBlockStateInfo(BlockState modded_state, ItemBlockPoly poly) {
             this.modded_state = modded_state;
             this.poly = poly;
+            this.generateClientCollisionState();
         }
 
         /**
@@ -368,6 +396,51 @@ public class ItemBlockPoly implements BlockPoly {
         public void setClientItem(ItemCMD item_cmd) {
             this.item_cmd = item_cmd;
             this.generateClientStack();
+        }
+
+        /**
+         * Get the preferred collision type
+         *
+         * @author   Jelle De Loecker   <jelle@elevenways.be>
+         * @since    0.2.0
+         */
+        public String getPreferredCollisionType() {
+            return this.poly.preferred_collision_type;
+        }
+
+        /**
+         * Generate the client-side blockstate to use as a basis
+         *
+         * @author   Jelle De Loecker   <jelle@elevenways.be>
+         * @since    0.2.0
+         */
+        private void generateClientCollisionState() {
+            if (this.poly.poly_plus_registry != null) {
+                this.client_collision_state = this.poly.poly_plus_registry.findInvisibleCollisionState(this);
+            } else {
+                this.client_collision_state = this.poly.barrier_state;
+            }
+        }
+
+        /**
+         * Get the modded BlockState
+         *
+         * @author   Jelle De Loecker   <jelle@elevenways.be>
+         * @since    0.2.0
+         */
+        public BlockState getModdedState() {
+            return this.modded_state;
+        }
+
+        /**
+         * Get the BlockState to use for the collision.
+         * This should ideally be an invisible state.
+         *
+         * @author   Jelle De Loecker   <jelle@elevenways.be>
+         * @since    0.2.0
+         */
+        public BlockState getClientCollisionState() {
+            return this.client_collision_state;
         }
 
         /**
@@ -520,31 +593,6 @@ public class ItemBlockPoly implements BlockPoly {
     }
 
     /**
-     * Variant roation keys
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
-    public static class VariantRotationKey {
-
-        private String key;
-        private String model;
-
-        public VariantRotationKey(JBlockStateVariant variant) {
-            this(variant.x(), variant.y(), variant.model());
-        }
-
-        public VariantRotationKey(int x, int y, String model) {
-            this.key = x + "," + y;
-            this.model = model;
-        }
-
-        public int hashCode() {
-            return this.key.hashCode() ^ this.model.hashCode();
-        }
-    }
-
-    /**
      * Combined property keys
      *
      * @author   Jelle De Loecker   <jelle@elevenways.be>
@@ -552,14 +600,50 @@ public class ItemBlockPoly implements BlockPoly {
      */
     public static class CombinedPropertyKey {
 
+        private Map<String, Property<?>> property_map = new HashMap<>();
         private TreeMap<String, Comparable<?>> properties = new TreeMap<>();
 
-        public void setProperty(String name, Comparable<?> value) {
-            this.properties.put(name, value);
+        public void setProperty(Property<?> property, Comparable<?> value) {
+            String property_name = property.getName();
+            this.properties.put(property_name, value);
+            this.property_map.put(property_name, property);
+
+            System.out.println("Setting property " + property_name + " to " + value + " - Key is now: " + this);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return ((o != null) && (this.hashCode() == o.hashCode()));
         }
 
         public int hashCode() {
-            return this.properties.hashCode();
+
+            int code = this.properties.hashCode();
+
+            System.out.println("    [" + this + "=" + code + "]");
+
+            return code;
+        }
+
+        public String toString() {
+            StringBuilder result = new StringBuilder("CombinedPropertyKey{");
+
+
+            int counter = -1;
+
+            for (String key : this.properties.keySet()) {
+                counter++;
+
+                if (counter > 0) {
+                    result.append(",");
+                }
+
+                result.append(key).append("=").append(this.properties.get(key));
+            }
+
+            result.append("}");
+
+            return result.toString();
         }
     }
 }
