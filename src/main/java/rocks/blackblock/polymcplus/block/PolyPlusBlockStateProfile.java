@@ -54,6 +54,10 @@ public class PolyPlusBlockStateProfile {
     public static final BlockStateProfile WALL_X_PROFILE = new BlockStateProfile("wall_x", WallFilters.WALL_BLOCKS, WallFilters.WALL_X_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
     public static final BlockStateProfile WALL_Z_PROFILE = new BlockStateProfile("wall_z", WallFilters.WALL_BLOCKS, WallFilters.WALL_Z_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
 
+    // Bed states
+
+    public static final BlockStateProfile BED_PROFILE = new BlockStateProfile("bed profiles", BedFilters.BED_BLOCKS, BedFilters.BED_ANY_FILTER, BedFilters.BED_ON_FIRST_REGISTER);
+
     /**
      * Is the given piece of string usable?
      *

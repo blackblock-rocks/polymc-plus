@@ -64,6 +64,7 @@ public class PolyPlusMap implements PolyMap {
      */
     private static final String ORIGINAL_ITEM_NBT = "PolyPlusOriginal";
 
+    private final PolyPlusRegistry registry;
     private final ImmutableMap<Item,ItemPoly> itemPolys;
     private final ItemTransformer[] globalItemPolys;
     private final ImmutableMap<Block,BlockPoly> blockPolys;
@@ -72,12 +73,14 @@ public class PolyPlusMap implements PolyMap {
     private final ImmutableList<SharedValuesKey.ResourceContainer> sharedValueResources;
     private final boolean hasBlockWizards;
 
-    public PolyPlusMap(ImmutableMap<Item,ItemPoly> itemPolys,
+    public PolyPlusMap(PolyPlusRegistry registry,
+                       ImmutableMap<Item,ItemPoly> itemPolys,
                        ItemTransformer[] globalItemPolys,
                        ImmutableMap<Block,BlockPoly> blockPolys,
                        ImmutableMap<ScreenHandlerType<?>,GuiPoly> guiPolys,
                        ImmutableMap<EntityType<?>,EntityPoly<?>> entityPolys,
                        ImmutableList<SharedValuesKey.ResourceContainer> sharedValueResources) {
+        this.registry = registry;
         this.itemPolys = itemPolys;
         this.globalItemPolys = globalItemPolys;
         this.blockPolys = blockPolys;
@@ -265,6 +268,8 @@ public class PolyPlusMap implements PolyMap {
         var pack = new ResourcePackImplementation();
 
         logger.info("Using: "+moddedResources);
+
+        this.registry.generateDefaultResources(moddedResources, pack, logger);
 
         //Let mods register resources via the api
         List<PolyMcEntrypoint> entrypoints = FabricLoader.getInstance().getEntrypoints("polymc", PolyMcEntrypoint.class);

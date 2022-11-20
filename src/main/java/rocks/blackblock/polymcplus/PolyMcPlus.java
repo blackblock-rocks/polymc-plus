@@ -5,6 +5,7 @@ import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,36 @@ public class PolyMcPlus implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("polymc-plus");
 	private static PolyPlusRegistry mainPolyPlusRegistry = null;
 	private static PolyPlusMap mainPolyPlusMap = null;
+	private static MinecraftDedicatedServer server = null;
+
+	/**
+	 * Set the server instance.
+	 * This is automatically called by the `ServerMixin` class upon server start.
+	 *
+	 * @param server
+	 */
+	public static void setServer(MinecraftDedicatedServer server) {
+		PolyMcPlus.server = server;
+	}
+
+	/**
+	 * Get the server instance, which is available after the server has started.
+	 */
+	public static MinecraftDedicatedServer getServer() {
+		return server;
+	}
+
+	/**
+	 * Get the current tick count
+	 */
+	public static int getTick() {
+
+		if (server == null) {
+			return -1;
+		}
+
+		return server.getTicks();
+	}
 
 	/**
 	 * Initialize PolyMcPlus
@@ -98,6 +129,8 @@ public class PolyMcPlus implements ModInitializer {
 		}
 
 		mainPolyPlusRegistry = new PolyPlusRegistry();
+
+		mainPolyPlusRegistry.registerDefaultBlocks();
 
 		// Register default global ItemPolys
 		PolyPlusGenerator.addDefaultGlobalItemPolys(mainPolyPlusRegistry);

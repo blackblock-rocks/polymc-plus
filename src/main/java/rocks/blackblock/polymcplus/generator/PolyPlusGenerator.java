@@ -2,7 +2,6 @@ package rocks.blackblock.polymcplus.generator;
 
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.impl.Util;
-import io.github.theepicblock.polymc.impl.generator.*;
 import io.github.theepicblock.polymc.impl.poly.item.Enchantment2LoreTransformer;
 import net.minecraft.util.registry.Registry;
 
@@ -37,6 +36,8 @@ public class PolyPlusGenerator {
     public static void addDefaultGlobalItemPolys(PolyRegistry registry) {
         registry.registerGlobalItemPoly(new Enchantment2LoreTransformer());
     }
+
+
 
     @FunctionalInterface
     public interface BooleanFunction<T> {
