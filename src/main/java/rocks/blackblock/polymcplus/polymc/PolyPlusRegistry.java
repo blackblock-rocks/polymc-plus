@@ -8,6 +8,7 @@ import io.github.theepicblock.polymc.api.block.BlockStateProfile;
 import io.github.theepicblock.polymc.api.item.ItemTransformer;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.api.resource.TextureAsset;
 import io.github.theepicblock.polymc.api.resource.json.JBlockState;
 import io.github.theepicblock.polymc.api.resource.json.JBlockStateVariant;
 import io.github.theepicblock.polymc.api.resource.json.JModel;
@@ -18,6 +19,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.BedPart;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
@@ -38,6 +40,15 @@ import java.util.stream.Stream;
  */
 public class PolyPlusRegistry extends PolyRegistry {
 
+    public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_SLABS;
+    public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_STAIRS;
+    public BlockState INVISIBLE_FULL_BLOCK = null;
+    public BlockState INVISIBLE_TRANSPARENT_FULL_BLOCK = null;
+    public BlockState INVISIBLE_CACTUS = null;
+    public BlockState INVISIBLE_CAMPFIRE = null;
+    public BlockState INVISIBLE_WATERLOGGED_CAMPFIRE = null;
+    private boolean registered = false;
+
     /**
      * Generate a new PolyMap based on this registry
      *
@@ -57,24 +68,236 @@ public class PolyPlusRegistry extends PolyRegistry {
     }
 
     /**
-     * Register certain blocks PolyPlus wants to use
-     * (mostly for ItemBlockPoly reasons)
+     * Request a blockstate from the manager
      *
      * @author   Jelle De Loecker   <jelle@elevenways.be>
      * @since    0.2.0
      */
-    public void registerDefaultBlocks() {
+    public BlockState requestBlockState(BlockStateProfile profile) {
 
-        // Get the (probably empty) blockstate manager
-        // So we can claim states first
         BlockStateManager manager = this.getSharedValues(BlockStateManager.KEY);
 
-        // Have to revisit this
+        try {
+            return manager.requestBlockState(profile);
+        } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+        return null;
     }
 
     /**
-     * Generate default resources for our "default" blocks
-     * (Make them invisible)
+     * Invisible campfire states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getInvisibleCampfireState() {
+
+        if (this.INVISIBLE_CAMPFIRE == null) {
+            this.INVISIBLE_CAMPFIRE = this.requestBlockState(PolyPlusBlockStateProfile.SOUL_CAMPFIRE_PROFILE.and(blockState -> !blockState.get(Properties.WATERLOGGED)));
+        }
+
+        return this.INVISIBLE_CAMPFIRE;
+    }
+
+    /**
+     * Invisible waterlogged campfire states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getInvisibleWaterloggedCampfireState() {
+
+        if (this.INVISIBLE_WATERLOGGED_CAMPFIRE == null) {
+            this.INVISIBLE_WATERLOGGED_CAMPFIRE = this.requestBlockState(PolyPlusBlockStateProfile.SOUL_CAMPFIRE_PROFILE.and(blockState -> blockState.get(Properties.WATERLOGGED)));
+        }
+
+        return this.INVISIBLE_WATERLOGGED_CAMPFIRE;
+    }
+
+    /**
+     * Invisible cactus states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getInvisibleCactusState() {
+
+        if (this.INVISIBLE_CACTUS == null) {
+            this.INVISIBLE_CACTUS = this.requestBlockState(BlockStateProfile.CACTUS_PROFILE);
+        }
+
+        return this.INVISIBLE_CACTUS;
+    }
+
+    /**
+     * Invisible full (non light-transparent) block.
+     * These blocks make the surrounding blocks appear darker.
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getInvisibleFullBlock() {
+
+        if (this.INVISIBLE_FULL_BLOCK == null) {
+            this.INVISIBLE_FULL_BLOCK = this.requestBlockState(BlockStateProfile.CHORUS_FLOWER_BLOCK_PROFILE);
+
+            if (this.INVISIBLE_FULL_BLOCK == null) {
+                this.INVISIBLE_FULL_BLOCK = this.getInvisibleFullTransparentBlock();
+            }
+        }
+
+        return this.INVISIBLE_FULL_BLOCK;
+    }
+
+    /**
+     * Invisible full transparent block.
+     * These blocks don't make the surrounding blocks appear darker.
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getInvisibleFullTransparentBlock() {
+
+        if (this.INVISIBLE_TRANSPARENT_FULL_BLOCK == null) {
+            this.INVISIBLE_TRANSPARENT_FULL_BLOCK = Blocks.BARRIER.getDefaultState();
+        }
+
+        return this.INVISIBLE_TRANSPARENT_FULL_BLOCK;
+    }
+
+    /**
+     * Invisible slab states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> getInvisibleSlabStates() {
+
+        if (this.INVISIBLE_SLABS == null) {
+            this.INVISIBLE_SLABS = new HashMap<>();
+
+            for (int waterlogged_counter = 0; waterlogged_counter <= 1; waterlogged_counter++) {
+                boolean is_waterlogged = waterlogged_counter == 1;
+
+                for (int slab_type_counter = 0; slab_type_counter <= 1; slab_type_counter++) {
+                    boolean is_bottom = slab_type_counter == 0;
+                    boolean is_top = slab_type_counter == 1;
+
+                    SlabType wanted_type = null;
+
+                    if (is_bottom) {
+                        wanted_type = SlabType.BOTTOM;
+                    } else if (is_top) {
+                        wanted_type = SlabType.TOP;
+                    }
+
+                    SlabType finalWanted_type = wanted_type;
+                    BlockState state = this.requestBlockState(BlockStateProfile.SLAB_PROFILE.and(
+                            offered_state -> {
+
+                                Boolean offered_is_waterlogged = offered_state.get(SlabBlock.WATERLOGGED);
+
+                                if (offered_is_waterlogged != is_waterlogged) {
+                                    return false;
+                                }
+
+                                SlabType slab_type = offered_state.get(SlabBlock.TYPE);
+
+                                if (slab_type != finalWanted_type) {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+                    ));
+
+                    if (state != null) {
+                        ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
+                        key.setProperty(SlabBlock.WATERLOGGED, is_waterlogged);
+                        key.setProperty(SlabBlock.TYPE, wanted_type);
+
+                        this.INVISIBLE_SLABS.put(key, state);
+                    }
+                }
+            }
+        }
+
+        return this.INVISIBLE_SLABS;
+    }
+
+    /**
+     * Invisible stair states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> getInvisibleStairStates() {
+
+        if (this.INVISIBLE_STAIRS == null) {
+            this.INVISIBLE_STAIRS = new HashMap<>();
+
+            for (int waterlogged_counter = 0; waterlogged_counter <= 1; waterlogged_counter++) {
+                boolean is_waterlogged = waterlogged_counter == 1;
+
+                // Register stairs
+                for (int stair_direction = 0; stair_direction <= 4; stair_direction++) {
+                    Direction facing = null;
+
+                    if (stair_direction == 0) {
+                        facing = Direction.NORTH;
+                    } else if (stair_direction == 1) {
+                        facing = Direction.EAST;
+                    } else if (stair_direction == 2) {
+                        facing = Direction.SOUTH;
+                    } else if (stair_direction == 3) {
+                        facing = Direction.WEST;
+                    } else {
+                        continue;
+                    }
+
+                    Direction wanted_facing = facing;
+                    BlockState state = this.requestBlockState(BlockStateProfile.WAXED_COPPER_STAIR_PROFILE.and(
+                            offered_state -> {
+
+                                BlockHalf half = offered_state.get(Properties.BLOCK_HALF);
+
+                                // We only want bottom stairs, otherwise we can just use a full block
+                                if (half != BlockHalf.BOTTOM) {
+                                    return false;
+                                }
+
+                                Boolean offered_is_waterlogged = offered_state.get(Properties.WATERLOGGED);
+
+                                if (offered_is_waterlogged != is_waterlogged) {
+                                    return false;
+                                }
+
+                                Direction offered_facing = offered_state.get(HorizontalFacingBlock.FACING);
+
+                                if (offered_facing == wanted_facing) {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+                    ));
+
+                    if (state != null) {
+                        ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
+                        key.setProperty(Properties.WATERLOGGED, is_waterlogged);
+                        key.setProperty(HorizontalFacingBlock.FACING, wanted_facing);
+
+                        this.INVISIBLE_STAIRS.put(key, state);
+                    }
+                }
+            }
+        }
+
+        return this.INVISIBLE_STAIRS;
+    }
+
+    /**
+     * Generate all the default (invisible) resources
      *
      * @author   Jelle De Loecker   <jelle@elevenways.be>
      * @since    0.2.0
@@ -82,10 +305,50 @@ public class PolyPlusRegistry extends PolyRegistry {
     public void generateDefaultResources(ModdedResources moddedResources, PolyMcResourcePack pack, SimpleLogger logger) {
 
         JModel invisible_model = new JModelImpl();
+        Map<String, String> textures = invisible_model.getTextures();
+
+        // Make the invisible model use invisible particles
+        textures.put("particle", "polymcplus:invisible");
+
+        // Get the "invisible" (transparent png) texture
+        TextureAsset invisible_texture = moddedResources.getTexture("polymcplus", "invisible");
+
+        // Add the invisible texture to the generated resource map
+        pack.setTexture("polymcplus", "invisible", invisible_texture);
         pack.setModel("polymcplus", "invisible", invisible_model);
 
-        // Again, placeholder for later
-        List<BlockState> states = new ArrayList<>();
+        Map<ItemBlockPoly.CombinedPropertyKey, BlockState> stairs_map = this.INVISIBLE_STAIRS;
+        Map<ItemBlockPoly.CombinedPropertyKey, BlockState> slabs_map = this.INVISIBLE_SLABS;
+
+        if (stairs_map == null) {
+            stairs_map = new HashMap<>();
+        }
+
+        if (slabs_map == null) {
+            slabs_map = new HashMap<>();
+        }
+
+        List<BlockState> states = new ArrayList<>(Stream.of(stairs_map, slabs_map).flatMap(map -> map.values().stream()).toList());
+
+        if (this.INVISIBLE_FULL_BLOCK != null) {
+            states.add(this.INVISIBLE_FULL_BLOCK);
+        }
+
+        if (this.INVISIBLE_TRANSPARENT_FULL_BLOCK != null) {
+            states.add(this.INVISIBLE_TRANSPARENT_FULL_BLOCK);
+        }
+
+        if (this.INVISIBLE_CACTUS != null) {
+            states.add(this.INVISIBLE_CACTUS);
+        }
+
+        if (this.INVISIBLE_CAMPFIRE != null) {
+            states.add(this.INVISIBLE_CAMPFIRE);
+        }
+
+        if (this.INVISIBLE_WATERLOGGED_CAMPFIRE != null) {
+            states.add(this.INVISIBLE_WATERLOGGED_CAMPFIRE);
+        }
 
         for (BlockState client_state : states) {
             Block client_block = client_state.getBlock();
@@ -100,14 +363,82 @@ public class PolyPlusRegistry extends PolyRegistry {
         }
     }
 
-    /**
-     * Find invisible collision states to use
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
     public BlockState findInvisibleCollisionState(ItemBlockPoly.ItemBlockStateInfo info) {
-        return Blocks.BARRIER.getDefaultState();
+
+        String preferred_collision_type = info.getPreferredCollisionType();
+        BlockState modded_state = info.getModdedState();
+        BlockState state = null;
+        VoxelShape shape = BlockPolyPlusGenerator.getCollisionShape(modded_state);
+
+        double min_y = shape.getMin(Direction.Axis.Y);
+        double max_y = shape.getMax(Direction.Axis.Y);
+        boolean do_stairs = "stairs".equals(preferred_collision_type);
+        boolean do_bed = "bed".equals(preferred_collision_type);
+        boolean do_cactus = "cactus".equals(preferred_collision_type);
+        boolean do_campfire = "campfire".equals(preferred_collision_type);
+        boolean is_waterlogged = false;
+        boolean blocks_light = modded_state.getMaterial().blocksLight();
+
+        if (modded_state.contains(Properties.WATERLOGGED)) {
+            is_waterlogged = modded_state.get(Properties.WATERLOGGED);
+        }
+
+        if (preferred_collision_type == null) {
+            if (Block.isShapeFullCube(shape)) {
+                if (blocks_light) {
+                    state = this.getInvisibleFullTransparentBlock();
+                } else {
+                    state = this.getInvisibleFullBlock();
+                }
+            } else if (Block.isFaceFullSquare(shape, Direction.UP) && min_y <= 0) {
+                if (blocks_light) {
+                    state = this.getInvisibleFullTransparentBlock();
+                } else {
+                    state = this.getInvisibleFullBlock();
+                }
+            } else if (max_y <= 0.5) {
+                // Get a bottom slab!
+
+                ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
+                key.setProperty(SlabBlock.WATERLOGGED, is_waterlogged);
+                key.setProperty(SlabBlock.TYPE, SlabType.BOTTOM);
+
+                state = this.getInvisibleSlabStates().get(key);
+            }
+        }
+
+        if (do_campfire) {
+            if (is_waterlogged) {
+                state = this.getInvisibleWaterloggedCampfireState();
+            }
+
+            if (state == null) {
+                state = this.getInvisibleCampfireState();
+            }
+        } else if (do_cactus) {
+            state = this.getInvisibleCactusState();
+        } else if (do_stairs) {
+
+            ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
+            key.setProperty(Properties.WATERLOGGED, is_waterlogged);
+
+            if (modded_state.contains(HorizontalFacingBlock.FACING)) {
+                Direction facing = modded_state.get(HorizontalFacingBlock.FACING);
+                key.setProperty(HorizontalFacingBlock.FACING, facing);
+            }
+
+            state = this.getInvisibleStairStates().get(key);
+
+            for (var ikey : this.getInvisibleStairStates().keySet()) {
+                var val = this.getInvisibleStairStates().get(ikey);
+            }
+        }
+
+        if (state == null) {
+            state = this.getInvisibleFullBlock();
+        }
+
+        return state;
     }
 
     /**
