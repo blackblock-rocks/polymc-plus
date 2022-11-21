@@ -58,6 +58,10 @@ public class PolyPlusBlockStateProfile {
 
     public static final BlockStateProfile BED_PROFILE = new BlockStateProfile("bed profiles", BedFilters.BED_BLOCKS, BedFilters.BED_ANY_FILTER, BedFilters.BED_ON_FIRST_REGISTER);
 
+    // Soul Campfire states
+    public static final BlockStateProfile SOUL_CAMPFIRE_PROFILE = BlockStateProfile.newProfile("soul campfire profiles", SoulCampfireFilters.SOUL_CAMPFIRE_BLOCKS, SoulCampfireFilters.SOUL_CAMPFIRE_FILTER, SoulCampfireFilters.SOUL_CAMPFIRE_ON_FIRST_REGISTER);
+
+
     /**
      * Is the given piece of string usable?
      *
