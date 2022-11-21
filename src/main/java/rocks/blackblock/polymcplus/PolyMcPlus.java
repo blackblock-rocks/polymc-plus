@@ -130,8 +130,6 @@ public class PolyMcPlus implements ModInitializer {
 
 		mainPolyPlusRegistry = new PolyPlusRegistry();
 
-		mainPolyPlusRegistry.registerDefaultBlocks();
-
 		// Register default global ItemPolys
 		PolyPlusGenerator.addDefaultGlobalItemPolys(mainPolyPlusRegistry);
 
