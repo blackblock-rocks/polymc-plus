@@ -41,7 +41,9 @@ public class PolyPlusRegistry extends PolyRegistry {
 
     public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_SLABS;
     public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_STAIRS;
+    public BlockState INVISIBLE_FULL_BLOCK;
     public BlockState INVISIBLE_BED;
+    public BlockState INVISIBLE_CACTUS;
     private boolean registered = false;
 
     /**
@@ -74,6 +76,16 @@ public class PolyPlusRegistry extends PolyRegistry {
 
         boolean register_slabs = false;
         boolean register_stairs = false;
+
+        try {
+            BlockState state = manager.requestBlockState(BlockStateProfile.CACTUS_PROFILE);
+            this.INVISIBLE_CACTUS = state;
+        } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+        try {
+            BlockState state = manager.requestBlockState(BlockStateProfile.CHORUS_FLOWER_BLOCK_PROFILE);
+            this.INVISIBLE_FULL_BLOCK = state;
+        } catch (BlockStateManager.StateLimitReachedException ignored) {}
 
         for (int waterlogged_counter = 0; waterlogged_counter <= 1; waterlogged_counter++) {
             boolean is_waterlogged = waterlogged_counter == 1;
@@ -193,6 +205,10 @@ public class PolyPlusRegistry extends PolyRegistry {
             } catch (BlockStateManager.StateLimitReachedException ignored) {}
         }
 
+        if (this.INVISIBLE_FULL_BLOCK == null) {
+            this.INVISIBLE_FULL_BLOCK = Blocks.BARRIER.getDefaultState();
+        }
+
     }
 
     public void generateDefaultResources(ModdedResources moddedResources, PolyMcResourcePack pack, SimpleLogger logger) {
@@ -200,11 +216,18 @@ public class PolyPlusRegistry extends PolyRegistry {
         JModel invisible_model = new JModelImpl();
         pack.setModel("polymcplus", "invisible", invisible_model);
 
-        List<BlockState> states = Stream.of(this.INVISIBLE_STAIRS, this.INVISIBLE_SLABS).flatMap(map -> map.values().stream()).toList();
+        List<BlockState> states = new ArrayList<>(Stream.of(this.INVISIBLE_STAIRS, this.INVISIBLE_SLABS).flatMap(map -> map.values().stream()).toList());
 
         if (this.INVISIBLE_BED != null) {
-            states = new ArrayList<>(states);
             states.add(this.INVISIBLE_BED);
+        }
+
+        if (this.INVISIBLE_FULL_BLOCK != null) {
+            states.add(this.INVISIBLE_FULL_BLOCK);
+        }
+
+        if (this.INVISIBLE_CACTUS != null) {
+            states.add(this.INVISIBLE_CACTUS);
         }
 
         for (BlockState client_state : states) {
@@ -234,19 +257,18 @@ public class PolyPlusRegistry extends PolyRegistry {
         double max_y = shape.getMax(Direction.Axis.Y);
         boolean do_stairs = "stairs".equals(preferred_collision_type);
         boolean do_bed = "bed".equals(preferred_collision_type);
+        boolean do_cactus = "cactus".equals(preferred_collision_type);
         boolean is_waterlogged = false;
 
         if (modded_state.contains(Properties.WATERLOGGED)) {
             is_waterlogged = modded_state.get(Properties.WATERLOGGED);
         }
 
-        System.out.println("Min Y of " + modded_state + " == " + min_y + ", Max Y is == " + max_y);
-
         if (preferred_collision_type == null) {
             if (Block.isShapeFullCube(shape)) {
-                state = Blocks.BARRIER.getDefaultState();
+                state = this.INVISIBLE_FULL_BLOCK;
             } else if (Block.isFaceFullSquare(shape, Direction.UP) && min_y <= 0) {
-                state = Blocks.BARRIER.getDefaultState();
+                state = this.INVISIBLE_FULL_BLOCK;
             } else if (max_y <= 0.5) {
                 // Get a bottom slab!
 
@@ -255,12 +277,12 @@ public class PolyPlusRegistry extends PolyRegistry {
                 key.setProperty(SlabBlock.TYPE, SlabType.BOTTOM);
 
                 state = this.INVISIBLE_SLABS.get(key);
-
-                System.out.println("Found invisible slab for " + key + " -- " + state);
             }
         }
 
-        if (do_bed) {
+        if (do_cactus) {
+            state = this.INVISIBLE_CACTUS;
+        } else if (do_bed) {
             state = this.INVISIBLE_BED;
         } else if (do_stairs) {
 
@@ -272,21 +294,15 @@ public class PolyPlusRegistry extends PolyRegistry {
                 key.setProperty(HorizontalFacingBlock.FACING, facing);
             }
 
-            System.out.println("Getting stair state for key " + key + "");
-            System.out.println(" -- State: " + modded_state);
-
             state = this.INVISIBLE_STAIRS.get(key);
-
-            System.out.println("   -- Found client state: " + state + " - Statecount: " + this.INVISIBLE_STAIRS.size());
 
             for (var ikey : this.INVISIBLE_STAIRS.keySet()) {
                 var val = this.INVISIBLE_STAIRS.get(ikey);
-                System.out.println(" -- AWEL?" +  ikey + "--" + val);
             }
         }
 
         if (state == null) {
-            state = Blocks.BARRIER.getDefaultState();
+            state = this.INVISIBLE_FULL_BLOCK;
         }
 
         return state;
