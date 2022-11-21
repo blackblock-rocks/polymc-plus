@@ -14,12 +14,19 @@ import io.github.theepicblock.polymc.impl.poly.wizard.SinglePlayerView;
 import io.github.theepicblock.polymc.impl.resource.ResourcePackGenerator;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.wizard.VArmorStand;
 
@@ -27,6 +34,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -133,6 +142,95 @@ public class PolyPlusCommands {
                             )
 
                     )
+                    .then(literal("generate-all-blockstates-and-destroy-landscape").executes(context -> {
+
+                        ServerCommandSource source = context.getSource();
+                        ServerPlayerEntity player = source.getPlayer();
+                        ServerWorld world = player.getWorld();
+
+                        if (!player.isCreative()) {
+                            source.sendError(Text.literal("You have to do this in Creative mode. This will ruin these chunks! Don't do it on live environment."));
+                            return 0;
+                        }
+
+                        List<BlockState> all_states = new ArrayList<>();
+
+                        for (Block block : Registry.BLOCK.stream().toList()) {
+                            for (BlockState state : block.getStateManager().getStates()) {
+                                all_states.add(state);
+                            }
+                        }
+
+                        int state_count = all_states.size();
+                        int count = -1;
+                        BlockPos player_pos = player.getBlockPos();
+                        BlockPos pos;
+
+                        int air_blocks = 0;
+
+                        // Make everything air first
+                        for (int x = -800; x < 1600; x++) {
+                            for (int y = 0; y <= 90; y++) {
+
+                                int new_y = player_pos.getY() + y;
+
+                                if (new_y > 320) {
+                                    continue;
+                                }
+
+                                for (int z = -34; z < 68; z++) {
+                                    pos = player_pos.add(x, y, z);
+
+                                    if (y == 0) {
+                                        world.setBlockState(pos, Blocks.STONE.getDefaultState());
+                                    } else {
+                                        air_blocks++;
+                                        world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                                    }
+                                }
+                            }
+                        }
+
+                        source.sendFeedback(Text.literal("Set " + air_blocks + " blocks to air. Doing BlockStates next"), false);
+
+                        // And now paste all the blockstates
+                        for (int x = -799; x < 1590; x += 3) {
+                            for (int z = -32; z < 64; z += 3) {
+                                pos = player_pos.add(x, 1, z);
+
+                                BlockState state = all_states.get(count + 1);
+
+                                if (state == null) {
+                                    break;
+                                }
+
+                                count++;
+
+                                try {
+
+                                    if (state.contains(Properties.WATERLOGGED)) {
+                                        boolean is_waterlogged = state.get(Properties.WATERLOGGED);
+
+                                        if (is_waterlogged) {
+                                            BlockState barrier = Blocks.BARRIER.getDefaultState();
+                                            world.setBlockState(pos.add(-1, 0, 0), barrier,Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                                            world.setBlockState(pos.add(1, 0, 0), barrier,Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                                            world.setBlockState(pos.add(0, 0, -1), barrier,Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                                            world.setBlockState(pos.add(0, 0, 1), barrier,Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                                        }
+                                    }
+
+                                    world.setBlockState(pos, state,Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                                } catch (Exception e) {
+                                    System.out.println("Failed to set state " + state + " at " + pos);
+                                }
+                            }
+                        }
+
+                        source.sendFeedback(Text.literal("Generated " + count + " blockstates into the world of a total of " + state_count), false);
+
+                        return 1;
+                    }))
             );
         });
     }
