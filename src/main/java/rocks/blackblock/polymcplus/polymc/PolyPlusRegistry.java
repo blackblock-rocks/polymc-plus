@@ -41,9 +41,11 @@ public class PolyPlusRegistry extends PolyRegistry {
 
     public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_SLABS;
     public Map<ItemBlockPoly.CombinedPropertyKey, BlockState> INVISIBLE_STAIRS;
-    public BlockState INVISIBLE_FULL_BLOCK;
-    public BlockState INVISIBLE_BED;
-    public BlockState INVISIBLE_CACTUS;
+    public BlockState INVISIBLE_FULL_BLOCK = null;
+    public BlockState INVISIBLE_BED = null;
+    public BlockState INVISIBLE_CACTUS = null;
+    public BlockState INVISIBLE_CAMPFIRE = null;
+    public BlockState INVISIBLE_WATERLOGGED_CAMPFIRE = null;
     private boolean registered = false;
 
     /**
@@ -85,6 +87,16 @@ public class PolyPlusRegistry extends PolyRegistry {
         try {
             BlockState state = manager.requestBlockState(BlockStateProfile.CHORUS_FLOWER_BLOCK_PROFILE);
             this.INVISIBLE_FULL_BLOCK = state;
+        } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+        try {
+            BlockState state = manager.requestBlockState(PolyPlusBlockStateProfile.SOUL_CAMPFIRE_PROFILE.and(blockState -> !blockState.get(Properties.WATERLOGGED)));
+            this.INVISIBLE_CAMPFIRE = state;
+        } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+        try {
+            BlockState state = manager.requestBlockState(PolyPlusBlockStateProfile.SOUL_CAMPFIRE_PROFILE.and(blockState -> blockState.get(Properties.WATERLOGGED)));
+            this.INVISIBLE_WATERLOGGED_CAMPFIRE = state;
         } catch (BlockStateManager.StateLimitReachedException ignored) {}
 
         for (int waterlogged_counter = 0; waterlogged_counter <= 1; waterlogged_counter++) {
@@ -230,6 +242,14 @@ public class PolyPlusRegistry extends PolyRegistry {
             states.add(this.INVISIBLE_CACTUS);
         }
 
+        if (this.INVISIBLE_CAMPFIRE != null) {
+            states.add(this.INVISIBLE_CAMPFIRE);
+        }
+
+        if (this.INVISIBLE_WATERLOGGED_CAMPFIRE != null) {
+            states.add(this.INVISIBLE_WATERLOGGED_CAMPFIRE);
+        }
+
         for (BlockState client_state : states) {
             Block client_block = client_state.getBlock();
             Identifier client_block_id = Registry.BLOCK.getId(client_block);
@@ -258,6 +278,7 @@ public class PolyPlusRegistry extends PolyRegistry {
         boolean do_stairs = "stairs".equals(preferred_collision_type);
         boolean do_bed = "bed".equals(preferred_collision_type);
         boolean do_cactus = "cactus".equals(preferred_collision_type);
+        boolean do_campfire = "campfire".equals(preferred_collision_type);
         boolean is_waterlogged = false;
 
         if (modded_state.contains(Properties.WATERLOGGED)) {
@@ -280,7 +301,15 @@ public class PolyPlusRegistry extends PolyRegistry {
             }
         }
 
-        if (do_cactus) {
+        if (do_campfire) {
+            if (is_waterlogged) {
+                state = this.INVISIBLE_WATERLOGGED_CAMPFIRE;
+            }
+
+            if (state == null) {
+                state = this.INVISIBLE_CAMPFIRE;
+            }
+        } else if (do_cactus) {
             state = this.INVISIBLE_CACTUS;
         } else if (do_bed) {
             state = this.INVISIBLE_BED;
