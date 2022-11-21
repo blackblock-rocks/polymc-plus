@@ -7,6 +7,8 @@ import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
 import io.github.theepicblock.polymc.impl.poly.block.SimpleReplacementPoly;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.RailShape;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -149,7 +151,27 @@ public class BlockPolyPlusGenerator {
         if (collisionShape.isEmpty() && !(moddedBlock instanceof WallBlock)) {
             var outlineShape = moddedState.getOutlineShape(fakeWorld, BlockPos.ORIGIN);
 
-            if (moddedBlock instanceof RailBlock) {
+            if (moddedBlock instanceof AbstractRailBlock) {
+                boolean is_waterlogged = false;
+
+
+                if (moddedState.contains(Properties.WATERLOGGED)) {
+                    is_waterlogged = moddedState.get(Properties.WATERLOGGED);
+                }
+
+                if (!is_waterlogged && moddedState.contains(Properties.RAIL_SHAPE)) {
+                    RailShape rail_shape = moddedState.get(Properties.RAIL_SHAPE);
+
+                    if (rail_shape != RailShape.ASCENDING_EAST && rail_shape != RailShape.ASCENDING_NORTH && rail_shape != RailShape.ASCENDING_SOUTH && rail_shape != RailShape.ASCENDING_WEST) {
+                        // Use the plants for this, because using tripwires for straight rails causes annoying
+                        // glitches when placing them down
+                        try {
+                            isUniqueCallback.set(true);
+                            return manager.requestBlockState(PolyPlusBlockStateProfile.PLANT_ROOT_PROFILE);
+                        } catch (BlockStateManager.StateLimitReachedException ignored) {}
+                    }
+                }
+
                 try {
                     isUniqueCallback.set(true);
                     return manager.requestBlockState(PolyPlusBlockStateProfile.NO_COLLISION_LOW_PROFILE.and(

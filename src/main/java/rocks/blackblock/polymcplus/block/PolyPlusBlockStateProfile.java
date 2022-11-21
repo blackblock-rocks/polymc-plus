@@ -55,12 +55,13 @@ public class PolyPlusBlockStateProfile {
     public static final BlockStateProfile WALL_Z_PROFILE = new BlockStateProfile("wall_z", WallFilters.WALL_BLOCKS, WallFilters.WALL_Z_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
 
     // Bed states
-
     public static final BlockStateProfile BED_PROFILE = new BlockStateProfile("bed profiles", BedFilters.BED_BLOCKS, BedFilters.BED_ANY_FILTER, BedFilters.BED_ON_FIRST_REGISTER);
 
     // Soul Campfire states
     public static final BlockStateProfile SOUL_CAMPFIRE_PROFILE = BlockStateProfile.newProfile("soul campfire profiles", SoulCampfireFilters.SOUL_CAMPFIRE_BLOCKS, SoulCampfireFilters.SOUL_CAMPFIRE_FILTER, SoulCampfireFilters.SOUL_CAMPFIRE_ON_FIRST_REGISTER);
 
+    // Plant root states
+    public static final BlockStateProfile PLANT_ROOT_PROFILE = BlockStateProfile.newProfile("plant root profiles", PlantRootFilters.PLANT_BLOCKS, PlantRootFilters.PLANT_AGE_FILTER, PlantRootFilters.PLANT_ROOT_ON_FIRST_REGISTER);
 
     /**
      * Is the given piece of string usable?
