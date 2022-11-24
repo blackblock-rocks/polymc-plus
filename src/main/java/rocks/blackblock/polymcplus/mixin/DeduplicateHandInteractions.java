@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import rocks.blackblock.polymcplus.polymc.DeduplicateInteractionInfo;
 import rocks.blackblock.polymcplus.tools.WeakTickCache;
 
 /**
@@ -28,7 +29,7 @@ import rocks.blackblock.polymcplus.tools.WeakTickCache;
 @Mixin(ServerPlayerInteractionManager.class)
 public class DeduplicateHandInteractions {
 
-    private static final WeakTickCache<PlayerEntity, Boolean> INTERACTED = new WeakTickCache<>(1);
+    private static final WeakTickCache<PlayerEntity, DeduplicateInteractionInfo> INTERACTED = new WeakTickCache<>(1);
 
     /**
      * Cancel the interaction if the player already had a successful interaction this tick
@@ -39,9 +40,20 @@ public class DeduplicateHandInteractions {
     @Inject(method="interactBlock", at = @At("HEAD"), cancellable = true)
     private void cancelDuplicateInteractions(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
 
-        Boolean result = INTERACTED.get(player);
+        DeduplicateInteractionInfo previous_result = INTERACTED.get(player);
 
-        if (result != null && result) {
+        if (previous_result != null) {
+
+            // Do nothing if it's the same hand, that's probably a brand new interaction
+            if (previous_result.isSameHand(hand)) {
+                return;
+            }
+
+            // If this interaction is for a different block position, it should also be OK!
+            if (!previous_result.blockHitResult().getBlockPos().equals(hitResult.getBlockPos())) {
+                return;
+            }
+
             cir.setReturnValue(ActionResult.PASS);
         }
     }
@@ -58,7 +70,8 @@ public class DeduplicateHandInteractions {
         ActionResult result = cir.getReturnValue();
 
         if (result.isAccepted()) {
-            INTERACTED.put(player, true);
+            DeduplicateInteractionInfo info = new DeduplicateInteractionInfo(hitResult, hand);
+            INTERACTED.put(player, info);
         }
     }
 
