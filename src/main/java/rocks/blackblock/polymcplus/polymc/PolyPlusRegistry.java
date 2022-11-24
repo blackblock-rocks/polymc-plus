@@ -376,6 +376,7 @@ public class PolyPlusRegistry extends PolyRegistry {
         boolean do_bed = "bed".equals(preferred_collision_type);
         boolean do_cactus = "cactus".equals(preferred_collision_type);
         boolean do_campfire = "campfire".equals(preferred_collision_type);
+        boolean do_full_transparent = "full_transparent".equals(preferred_collision_type);
         boolean is_waterlogged = false;
         boolean blocks_light = modded_state.getMaterial().blocksLight();
 
@@ -386,17 +387,22 @@ public class PolyPlusRegistry extends PolyRegistry {
         if (preferred_collision_type == null) {
             if (Block.isShapeFullCube(shape)) {
                 if (blocks_light) {
-                    state = this.getInvisibleFullTransparentBlock();
-                } else {
                     state = this.getInvisibleFullBlock();
+                } else {
+                    state = this.getInvisibleFullTransparentBlock();
                 }
             } else if (Block.isFaceFullSquare(shape, Direction.UP) && min_y <= 0) {
                 if (blocks_light) {
-                    state = this.getInvisibleFullTransparentBlock();
-                } else {
                     state = this.getInvisibleFullBlock();
+                } else {
+                    state = this.getInvisibleFullTransparentBlock();
                 }
-            } else if (max_y <= 0.5) {
+            } else if (max_y < 0.5) {
+                // Get a campfire
+                state = this.getInvisibleCampfireState();
+            }
+
+            if (state == null && max_y <= 0.5) {
                 // Get a bottom slab!
 
                 ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
@@ -407,7 +413,9 @@ public class PolyPlusRegistry extends PolyRegistry {
             }
         }
 
-        if (do_campfire) {
+        if (do_full_transparent) {
+            state = this.getInvisibleFullTransparentBlock();
+        } else if (do_campfire) {
             if (is_waterlogged) {
                 state = this.getInvisibleWaterloggedCampfireState();
             }
