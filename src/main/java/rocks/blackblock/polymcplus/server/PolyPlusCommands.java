@@ -17,6 +17,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 import net.minecraft.server.command.CommandManager;
@@ -25,9 +26,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import rocks.blackblock.polymcplus.PolyMcPlus;
+import rocks.blackblock.polymcplus.wizard.TestVirtualEntity;
 import rocks.blackblock.polymcplus.wizard.VArmorStand;
 
 import java.io.FileOutputStream;
@@ -93,7 +96,7 @@ public class PolyPlusCommands {
                                         return Command.SINGLE_SUCCESS;
                                     }))
                     )
-                    .then(literal("spawntest")
+                    .then(literal("spawn-fps-test")
                             .then(CommandManager.argument("type", StringArgumentType.string())
                                     .executes(context -> {
 
@@ -141,6 +144,37 @@ public class PolyPlusCommands {
                                     })
                             )
 
+                    )
+                    .then(literal("spawn-virtual-entity")
+                            .then(CommandManager.argument("entity_id", StringArgumentType.string())
+                                    .executes(context -> {
+
+                                        ServerCommandSource source = context.getSource();
+                                        ServerPlayerEntity player = source.getPlayer();
+
+                                        if (player == null) {
+                                            source.sendError(Text.literal("You must be a player to execute this command."));
+                                            return 0;
+                                        }
+
+                                        SinglePlayerView consumer = new SinglePlayerView(player);
+
+                                        String entity_type_name = StringArgumentType.getString(context, "entity_id");
+
+                                        EntityType<?> entity_type = Registry.ENTITY_TYPE.get(Identifier.tryParse(entity_type_name));
+
+                                        if (entity_type == null) {
+                                            source.sendError(Text.literal("Could not find an entity with the id '" + entity_type_name + "'"));
+                                            return 0;
+                                        }
+
+                                        TestVirtualEntity entity = new TestVirtualEntity(entity_type);
+                                        entity.spawn(consumer, player.getPos());
+                                        entity.setNoGravity(consumer, true);
+
+                                        return 1;
+                                    })
+                            )
                     )
                     .then(literal("generate-all-blockstates-and-destroy-landscape").executes(context -> {
 
