@@ -5,10 +5,7 @@ import io.github.theepicblock.polymc.api.item.CustomModelDataManager;
 import io.github.theepicblock.polymc.api.item.ItemPoly;
 import io.github.theepicblock.polymc.impl.generator.ItemPolyGenerator;
 import io.github.theepicblock.polymc.impl.poly.item.CustomModelDataPoly;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
+import net.minecraft.item.*;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 
 /**

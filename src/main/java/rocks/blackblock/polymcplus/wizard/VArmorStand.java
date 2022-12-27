@@ -1,6 +1,7 @@
 package rocks.blackblock.polymcplus.wizard;
 
 import com.mojang.datafixers.util.Pair;
+import io.github.theepicblock.polymc.PolyMc;
 import io.github.theepicblock.polymc.api.wizard.PacketConsumer;
 import io.github.theepicblock.polymc.impl.poly.wizard.AbstractVirtualEntity;
 import io.github.theepicblock.polymc.impl.poly.wizard.EntityUtil;
@@ -29,19 +30,35 @@ public class VArmorStand extends AbstractVirtualEntity {
         if (hideBasePlate) flag += ArmorStandEntity.HIDE_BASE_PLATE_FLAG;
         if (isMarker)      flag += ArmorStandEntity.MARKER_FLAG;
 
-        players.sendPacket(EntityUtil.createDataTrackerUpdate(
-                this.id,
-                ArmorStandEntity.ARMOR_STAND_FLAGS,
-                flag
-        ));
+        try {
+
+            players.sendPacket(EntityUtil.createDataTrackerUpdate(
+                    this.id,
+                    ArmorStandEntity.ARMOR_STAND_FLAGS,
+                    flag
+            ));
+        } catch (Exception e) {
+            PolyMc.LOGGER.error("Error sending ArmorStand flags packet: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void sendSingleSlot(PacketConsumer players, EquipmentSlot slot, ItemStack stack) {
-        players.sendPacket(new EntityEquipmentUpdateS2CPacket(this.id, Collections.singletonList(new Pair<>(slot, stack))));
+        try {
+            players.sendPacket(new EntityEquipmentUpdateS2CPacket(this.id, Collections.singletonList(new Pair<>(slot, stack))));
+        } catch (Exception e) {
+            PolyMc.LOGGER.error("Error sending head single-slot packet: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void sendHeadRotation(PacketConsumer players, EulerAngle angle) {
-        players.sendPacket(headRotationPacket(angle));
+        try {
+            players.sendPacket(headRotationPacket(angle));
+        } catch (Exception e) {
+            PolyMc.LOGGER.error("Error sending head rotation packet: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void sendHeadRotation(PacketConsumer players, float pitch, float yaw, float roll) {
