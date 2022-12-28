@@ -28,10 +28,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.resource.InputSupplier;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -41,6 +43,7 @@ import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -310,16 +313,19 @@ public class PolyPlusMap implements PolyMap {
         // Import the language files for all mods
         var languageKeys = new TreeMap<String, Map<String, String>>(); // The first hashmap is per-language. Then it's translationkey->translation
         for (var lang : moddedResources.locateLanguageFiles()) {
+            Identifier lang_identifier = lang.getLeft();
+            InputSupplier<InputStream> supplier = lang.getRight();
+
             // Ignore fapi
-            if (lang.getNamespace().equals("fabric")) continue;
-            for (var stream : moddedResources.getInputStreams(lang.getNamespace(), lang.getPath())) {
-                try (var streamReader = new InputStreamReader(stream, StandardCharsets.UTF_8)){
+            if (lang_identifier.getNamespace().equals("fabric")) continue;
+            for (var stream : moddedResources.getInputStreams(lang_identifier.getNamespace(), lang_identifier.getPath())) {
+                try (var streamReader = new InputStreamReader(stream.get(), StandardCharsets.UTF_8)){
                     // Copy all of the language keys into the main map
                     var languageObject = pack.getGson().fromJson(streamReader, JsonObject.class);
-                    var mainLangMap = languageKeys.computeIfAbsent(lang.getPath(), (key) -> new TreeMap<>());
+                    var mainLangMap = languageKeys.computeIfAbsent(lang_identifier.getPath(), (key) -> new TreeMap<>());
                     languageObject.entrySet().forEach(entry -> mainLangMap.put(entry.getKey(), JsonHelper.asString(entry.getValue(), entry.getKey())));
                 } catch (JsonParseException | IOException e) {
-                    logger.error("Couldn't parse lang file "+lang);
+                    logger.error("Couldn't parse lang file "+lang_identifier);
                     e.printStackTrace();
                 }
             }

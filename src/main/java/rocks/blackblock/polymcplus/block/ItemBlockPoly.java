@@ -16,10 +16,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.wizard.ItemBlockWizard;
@@ -99,7 +99,7 @@ public class ItemBlockPoly implements BlockPoly {
         this.states_cached_items = new HashMap<>();
 
         this.modded_block = modded_states.get(0).getBlock();
-        this.block_id = Registry.BLOCK.getId(this.modded_block);
+        this.block_id = Registries.BLOCK.getId(this.modded_block);
 
         this.processModdedStates(modded_states, registry);
     }
@@ -208,7 +208,7 @@ public class ItemBlockPoly implements BlockPoly {
     public void addToResourcePack(List<BlockState> modded_states, ModdedResources modded_resources, PolyMcResourcePack pack, SimpleLogger logger) {
 
         Block modded_block = modded_states.get(0).getBlock();
-        Identifier modded_block_id = Registry.BLOCK.getId(modded_block);
+        Identifier modded_block_id = Registries.BLOCK.getId(modded_block);
         JBlockState modded_block_state = modded_resources.getBlockState(modded_block_id.getNamespace(), modded_block_id.getPath());
 
         // First we have to import all the models of the modded states
@@ -265,7 +265,7 @@ public class ItemBlockPoly implements BlockPoly {
     public void old_addToResourcePack(List<BlockState> modded_states, ModdedResources modded_resources, PolyMcResourcePack pack, SimpleLogger logger) {
 
         Block modded_block = modded_states.get(0).getBlock();
-        Identifier modded_block_id = Registry.BLOCK.getId(modded_block);
+        Identifier modded_block_id = Registries.BLOCK.getId(modded_block);
         JBlockState modded_block_state = modded_resources.getBlockState(modded_block_id.getNamespace(), modded_block_id.getPath());
 
         if (modded_block_state == null) {
@@ -292,7 +292,7 @@ public class ItemBlockPoly implements BlockPoly {
             pack.importRequirements(modded_resources, modded_variants, logger);
 
             Item client_item = this.states_client_items.get(modded_state);
-            Identifier client_item_id = Registry.ITEM.getId(client_item);
+            Identifier client_item_id = Registries.ITEM.getId(client_item);
 
             // Copy and retrieve the vanilla item's model
             JModel client_item_model = pack.getOrDefaultVanillaItemModel(modded_resources, client_item_id.getNamespace(), client_item_id.getPath(), logger);
@@ -578,7 +578,7 @@ public class ItemBlockPoly implements BlockPoly {
          * @since    0.2.0
          */
         public Identifier getIdentifier() {
-            return Registry.ITEM.getId(this.client_item);
+            return Registries.ITEM.getId(this.client_item);
         }
 
         /**

@@ -16,14 +16,12 @@ import io.github.theepicblock.polymc.impl.Util;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.json.JModelImpl;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.BedPart;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import rocks.blackblock.polymcplus.block.ItemBlockPoly;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
@@ -352,7 +350,7 @@ public class PolyPlusRegistry extends PolyRegistry {
 
         for (BlockState client_state : states) {
             Block client_block = client_state.getBlock();
-            Identifier client_block_id = Registry.BLOCK.getId(client_block);
+            Identifier client_block_id = Registries.BLOCK.getId(client_block);
 
             JBlockState client_block_states = pack.getOrDefaultBlockState(client_block_id.getNamespace(), client_block_id.getPath());
             String client_state_string = Util.getPropertiesFromBlockState(client_state);

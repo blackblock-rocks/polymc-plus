@@ -5,8 +5,8 @@ import io.github.theepicblock.polymc.api.entity.EntityPoly;
 import io.github.theepicblock.polymc.impl.generator.EntityPolyGenerator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 /**
  * Class to automatically generate {@link EntityPoly}s for {@link EntityType}s
@@ -15,7 +15,7 @@ public class EntityPolyPlusGenerator extends EntityPolyGenerator {
 
     public static <T extends Entity> EntityPoly<T> generatePoly(EntityType<T> entityType, PolyRegistry builder) {
 
-        Identifier entity_id = Registry.ENTITY_TYPE.getId(entityType);
+        Identifier entity_id = Registries.ENTITY_TYPE.getId(entityType);
 
         System.out.println(" -- GENERATING ENTITY POLY FOR '" + entity_id + "'");
 
@@ -27,7 +27,7 @@ public class EntityPolyPlusGenerator extends EntityPolyGenerator {
             //return (info, entity) -> null; // Compatibility with Blackblock Redshirts
         }
 
-        System.out.println("Generating Entity poly for: " + entityType + " - " + Registry.ENTITY_TYPE.getId(entityType));
+        System.out.println("Generating Entity poly for: " + entityType + " - " + Registries.ENTITY_TYPE.getId(entityType));
 
         return EntityPolyGenerator.generatePoly(entityType, builder);
     }

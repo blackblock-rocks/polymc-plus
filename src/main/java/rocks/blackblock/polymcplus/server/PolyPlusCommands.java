@@ -20,6 +20,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,7 +29,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.wizard.TestVirtualEntity;
 import rocks.blackblock.polymcplus.wizard.VArmorStand;
@@ -161,7 +161,7 @@ public class PolyPlusCommands {
 
                                         String entity_type_name = StringArgumentType.getString(context, "entity_id");
 
-                                        EntityType<?> entity_type = Registry.ENTITY_TYPE.get(Identifier.tryParse(entity_type_name));
+                                        EntityType<?> entity_type = Registries.ENTITY_TYPE.get(Identifier.tryParse(entity_type_name));
 
                                         if (entity_type == null) {
                                             source.sendError(Text.literal("Could not find an entity with the id '" + entity_type_name + "'"));
@@ -189,7 +189,7 @@ public class PolyPlusCommands {
 
                         List<BlockState> all_states = new ArrayList<>();
 
-                        for (Block block : Registry.BLOCK.stream().toList()) {
+                        for (Block block : Registries.BLOCK.stream().toList()) {
                             for (BlockState state : block.getStateManager().getStates()) {
                                 all_states.add(state);
                             }
