@@ -198,7 +198,15 @@ public class FallbackItemBlockPoly implements BlockPoly {
 
             // Get the model that the modded block state uses and assign it to the client block state
             var moddedVariants = moddedBlockState.getVariantsBestMatching(moddedState);
-            clientBlockStates.setVariant(clientStateString, moddedVariants);
+
+            try {
+                clientBlockStates.setVariant(clientStateString, moddedVariants);
+            } catch (Exception e) {
+                logger.error("Error while setting variant for "+clientBlockId+" "+clientStateString+" to "+moddedVariants);
+                e.printStackTrace();
+
+                logger.error("Modded blockstate: "+moddedState);
+            }
 
             pack.importRequirements(moddedResources, moddedVariants, logger);
 

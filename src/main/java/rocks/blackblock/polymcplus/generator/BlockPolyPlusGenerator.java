@@ -3,6 +3,7 @@ package rocks.blackblock.polymcplus.generator;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateManager;
+import io.github.theepicblock.polymc.api.block.BlockStateMerger;
 import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
 import io.github.theepicblock.polymc.impl.poly.block.SimpleReplacementPoly;
@@ -53,6 +54,13 @@ public class BlockPolyPlusGenerator {
      */
     public static BlockPoly generatePoly(Block block, PolyRegistry registry) {
         return new FallbackItemBlockPoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY)), registry);
+    }
+
+    /**
+     * Generates the most suitable {@link BlockPoly} for a given {@link Block}
+     */
+    public static BlockPoly generatePoly(Block block, PolyRegistry registry, BlockStateMerger merger) {
+        return new FallbackItemBlockPoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY)), registry, merger);
     }
 
     /**
