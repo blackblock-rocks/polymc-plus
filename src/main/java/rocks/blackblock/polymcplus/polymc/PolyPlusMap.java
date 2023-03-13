@@ -229,12 +229,12 @@ public class PolyPlusMap implements PolyMap {
     }
 
     @Override
-    public boolean shouldForceBlockStateSync(World world, BlockState sourceState, BlockPos sourcePos, BlockPos oppositePos, BlockState clientState, Direction direction) {
+    public boolean shouldForceBlockStateSync(BlockState sourceState, BlockState clientState, Direction direction) {
         Block block = clientState.getBlock();
 
         // Mushroom blocks only trigger updates when a non-sheared face touches another mushroom block of the same type
         if (block == Blocks.BROWN_MUSHROOM_BLOCK || block == Blocks.RED_MUSHROOM_BLOCK || block == Blocks.MUSHROOM_STEM) {
-            return MushroomFilters.mushroomNeedsResync(this, world, sourceState, sourcePos, oppositePos, clientState, direction);
+            return MushroomFilters.mushroomNeedsResync(this, sourceState, clientState, direction);
         }
 
         // Wall blocks update whenever a block updates around them

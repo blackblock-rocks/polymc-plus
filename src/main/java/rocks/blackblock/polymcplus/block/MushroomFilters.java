@@ -189,7 +189,7 @@ public class MushroomFilters {
      * @author   Jelle De Loecker   <jelle@elevenways.be>
      * @since    0.1.0
      */
-    public static boolean mushroomNeedsResync(PolyMap polyMap, World world, BlockState sourceState, BlockPos sourcePos, BlockPos oppositePos, BlockState clientState, Direction direction) {
+    public static boolean mushroomNeedsResync(PolyMap polyMap, BlockState sourceState, BlockState clientState, Direction direction) {
 
         Block block = clientState.getBlock();
 
@@ -198,20 +198,17 @@ public class MushroomFilters {
 
         if (hasNonShearedFace) {
 
-            // Now get the server-side blockstate of the opposite side
-            BlockState oppositeState = world.getBlockState(oppositePos);
-
             // Try to get the player's BlockPoly for this opposite side
-            BlockPoly poly = polyMap.getBlockPoly(oppositeState.getBlock());
+            BlockPoly poly = polyMap.getBlockPoly(sourceState.getBlock());
 
             BlockState oppositeClientState = null;
 
             if (poly == null) {
                 // There is no poly map, so the server-side state should be the same as the client-side's one
-                oppositeClientState = oppositeState;
+                oppositeClientState = sourceState;
             } else {
                 // There is a polymap, so the client-side state differs from the server-side one
-                oppositeClientState = poly.getClientBlock(oppositeState);
+                oppositeClientState = poly.getClientBlock(sourceState);
             }
 
             // Get the opposite block as used on the client-side
