@@ -8,6 +8,8 @@ import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateMerger;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.api.resource.json.JBlockState;
+import io.github.theepicblock.polymc.api.resource.json.JBlockStateVariant;
 import io.github.theepicblock.polymc.api.wizard.Wizard;
 import io.github.theepicblock.polymc.api.wizard.WizardInfo;
 import io.github.theepicblock.polymc.impl.Util;
@@ -176,48 +178,72 @@ public class FallbackItemBlockPoly implements BlockPoly {
      * @since    0.2.0
      */
     @Override
-    public void addToResourcePack(Block block, ModdedResources moddedResources, PolyMcResourcePack pack, SimpleLogger logger) {
+    public void addToResourcePack(Block block, ModdedResources modded_resources, PolyMcResourcePack pack, SimpleLogger logger) {
 
-        Identifier moddedBlockId = Registries.BLOCK.getId(block);
+        Identifier modded_block_id = Registries.BLOCK.getId(block);
+
         // Read the modded block state file. This tells us which model is used for which block state
-        var moddedBlockState = moddedResources.getBlockState(moddedBlockId.getNamespace(), moddedBlockId.getPath());
-        if (moddedBlockState == null) {
-            logger.error("Can't find blockstate definition for "+moddedBlockId+", can't generate resources for it");
+        JBlockState modded_json_state = modded_resources.getBlockState(modded_block_id.getNamespace(), modded_block_id.getPath());
+
+        if (modded_json_state == null) {
+            logger.error("Can't find blockstate definition for "+modded_block_id+", can't generate resources for it");
             return;
         }
 
-        HashSet<BlockState> clientStatesDone = new HashSet<>();
+        HashSet<BlockState> seen_client_states = new HashSet<>();
+
         // Iterate modded block states
-        this.states.forEach((moddedState, clientState) -> {
-            if (clientStatesDone.contains(clientState)) return;
-            if (!unique_client_blocks.contains(clientState)) return;
+        this.states.forEach((modded_state, client_state) -> {
 
-            var clientBlockId = Registries.BLOCK.getId(clientState.getBlock());
-            var clientBlockStates = pack.getOrDefaultBlockState(clientBlockId.getNamespace(), clientBlockId.getPath());
-            var clientStateString = Util.getPropertiesFromBlockState(clientState);
-
-            // Get the model that the modded block state uses and assign it to the client block state
-            var moddedVariants = moddedBlockState.getVariantsBestMatching(moddedState);
-
-            try {
-                clientBlockStates.setVariant(clientStateString, moddedVariants);
-            } catch (Exception e) {
-                logger.error("Error while setting variant for "+clientBlockId+" "+clientStateString+" to "+moddedVariants + " of modded state " + moddedState);
-                e.printStackTrace();
-
-                logger.error("Modded blockstate: "+moddedState);
+            if (seen_client_states.contains(client_state)) {
+                return;
             }
 
-            pack.importRequirements(moddedResources, moddedVariants, logger);
+            if (!unique_client_blocks.contains(client_state)) {
+                return;
+            }
 
-            clientStatesDone.add(clientState);
+            // Get the identifier of the block that will be used on the client side
+            Identifier client_block_id = Registries.BLOCK.getId(client_state.getBlock());
+
+            JBlockState client_json_state = pack.getOrDefaultBlockState(client_block_id.getNamespace(), client_block_id.getPath());
+
+            // Get the string representation of the client block state
+            String client_state_string = Util.getPropertiesFromBlockState(client_state);
+
+            // Get the model that the modded block state uses and assign it to the client block state
+            JBlockStateVariant[] modded_variants = modded_json_state.getVariantsBestMatching(modded_state);
+
+            // Skip the state if no variants are defined for it
+            if (modded_variants == null) {
+                return;
+            }
+
+            try {
+                client_json_state.setVariant(client_state_string, modded_variants);
+            } catch (Exception e) {
+                logger.error("Error while setting variant for "+client_block_id+" "+client_state_string+" to "+modded_variants + " of modded state " + modded_state);
+                e.printStackTrace();
+
+                logger.error("Modded blockstate: "+modded_state);
+            }
+
+            pack.importRequirements(modded_resources, modded_variants, logger);
+
+            seen_client_states.add(client_state);
         });
 
         if (this.has_fallbacks) {
-            this.fallback_poly.addToResourcePack(this.fallback_states.keySet().stream().toList(), moddedResources, pack, logger);
+            this.fallback_poly.addToResourcePack(this.fallback_states.keySet().stream().toList(), modded_resources, pack, logger);
         }
     }
 
+    /**
+     * Return a string representation of this instance
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
     @Override
     public String toString() {
         return "FallbackItemBlockPoly{" + this.modded_block + ",replacedstates=" + this.states.size() + ",itemstates=" + this.fallback_states.size() + "}";
