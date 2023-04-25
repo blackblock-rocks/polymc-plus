@@ -22,7 +22,7 @@ public class ItemBlockWizard extends Wizard {
         this.item_frame.setNoGravity(player, true);
         this.item_frame.sendItemStack(player, this.info.getClientStack());
         this.item_frame.makeInvisible(player);
-        this.item_frame.move(player, this.getPosition(), this.info.getYaw(), 0, false);
+        this.item_frame.move(player, this.getPosition(), this.info.getYaw(), this.info.getPitch(), false);
     }
 
     @Override

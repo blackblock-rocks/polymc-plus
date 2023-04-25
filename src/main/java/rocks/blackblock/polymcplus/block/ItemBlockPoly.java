@@ -21,6 +21,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.shape.VoxelShape;
+import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.wizard.ItemBlockWizard;
 
@@ -114,7 +115,7 @@ public class ItemBlockPoly implements BlockPoly {
 
         var modded_resources = new ModdedResourceContainerImpl();
 
-        // We need the blockstate json info, because we can re-use models that only need rotating
+        // We need the modded block's blockstate json info, because we can re-use models that only need rotating
         JBlockState modded_block_state = modded_resources.getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
 
         for (BlockState modded_state : modded_states) {
@@ -122,6 +123,12 @@ public class ItemBlockPoly implements BlockPoly {
             ItemBlockStateInfo info = new ItemBlockStateInfo(modded_state, this);
 
             JBlockStateVariant[] modded_variants = modded_block_state.getVariantsBestMatching(modded_state);
+
+            if (modded_variants.length == 0) {
+                PolyMcPlus.LOGGER.error("No variants found for " + modded_state);
+                continue;
+            }
+
             JBlockStateVariant best_variant = modded_variants[0];
 
             Integer x = best_variant.x();
@@ -359,6 +366,9 @@ public class ItemBlockPoly implements BlockPoly {
         // The calculated yaw
         protected int yaw;
 
+        // The calculated pitch
+        protected int pitch;
+
         // The client collision blockstate
         protected BlockState client_collision_state = null;
 
@@ -451,6 +461,12 @@ public class ItemBlockPoly implements BlockPoly {
          */
         public void setX(Integer x) {
             this.x = x;
+
+            if (x == null || x == 0) {
+                this.pitch = 0;
+            } else {
+                this.pitch = (x + 180) % 360;
+            }
         }
 
         /**
@@ -497,6 +513,16 @@ public class ItemBlockPoly implements BlockPoly {
          */
         public int getYaw() {
             return this.yaw;
+        }
+
+        /**
+         * Get the pitch rotation
+         *
+         * @author   Jelle De Loecker   <jelle@elevenways.be>
+         * @since    0.4.0
+         */
+        public int getPitch() {
+            return this.pitch;
         }
 
         /**

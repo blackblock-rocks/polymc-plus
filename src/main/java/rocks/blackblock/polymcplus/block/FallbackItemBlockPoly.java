@@ -202,7 +202,7 @@ public class FallbackItemBlockPoly implements BlockPoly {
             try {
                 clientBlockStates.setVariant(clientStateString, moddedVariants);
             } catch (Exception e) {
-                logger.error("Error while setting variant for "+clientBlockId+" "+clientStateString+" to "+moddedVariants);
+                logger.error("Error while setting variant for "+clientBlockId+" "+clientStateString+" to "+moddedVariants + " of modded state " + moddedState);
                 e.printStackTrace();
 
                 logger.error("Modded blockstate: "+moddedState);
