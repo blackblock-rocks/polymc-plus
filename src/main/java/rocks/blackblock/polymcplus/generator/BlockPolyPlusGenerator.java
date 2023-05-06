@@ -64,6 +64,22 @@ public class BlockPolyPlusGenerator {
     }
 
     /**
+     * Generate a {@link BlockPoly} for a given {@link Block}, but make sure it's opaque.
+     * This prevents it from using one of the more rare transparent poly types.
+     */
+    public static BlockPoly generateOpaquePoly(Block block, PolyRegistry registry) {
+        return new FallbackItemBlockPoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY), true), registry);
+    }
+
+    /**
+     * Generate a {@link BlockPoly} for a given {@link Block}, but make sure it's opaque.
+     * This prevents it from using one of the more rare transparent poly types.
+     */
+    public static BlockPoly generateOpaquePoly(Block block, PolyRegistry registry, BlockStateMerger merger) {
+        return new FallbackItemBlockPoly(block, (state, isUniqueCallback) -> registerClientState(state, isUniqueCallback, registry.getSharedValues(BlockStateManager.KEY), true), registry, merger);
+    }
+
+    /**
      * Get the collision shape of a state
      *
      * @author   Jelle De Loecker   <jelle@elevenways.be>
@@ -99,14 +115,29 @@ public class BlockPolyPlusGenerator {
      * @return   A client state which best matches the moddedState
      */
     public static BlockState registerClientState(BlockState moddedState, BooleanContainer isUniqueCallback, BlockStateManager manager) {
+        return registerClientState(moddedState, isUniqueCallback, manager, moddedState.isOpaque());
+    }
+
+    /**
+     * Get the most suitable client-side BlockState to use for the given modded BlockState.
+     * This method uses some custom logic, and will fall back to PolyMC's native implementation when nothing is found.
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.1.0
+     *
+     * @param    moddedState        The modded BlockState to get the client-side BlockState for
+     * @param    isUniqueCallback   Will be set to true if the return value is a unique block that'll only be used for the inputted moddedState
+     * @param    manager            The BlockStateManager to use
+     *
+     * @return   A client state which best matches the moddedState
+     */
+    public static BlockState registerClientState(BlockState moddedState, BooleanContainer isUniqueCallback, BlockStateManager manager, boolean isOpaque) {
 
         Block moddedBlock = moddedState.getBlock();
         BlockPolyGenerator.FakedWorld fakeWorld = new BlockPolyGenerator.FakedWorld(moddedState);
 
         //Get the state's collision shape.
         VoxelShape collisionShape = getCollisionShape(moddedState);
-
-        boolean isOpaque = moddedState.isOpaque();
 
         // == FULL BLOCKS ==
         if (Block.isShapeFullCube(collisionShape) && isOpaque) {
