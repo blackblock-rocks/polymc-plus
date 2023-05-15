@@ -3,6 +3,9 @@ package rocks.blackblock.polymcplus;
 import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
+import io.github.theepicblock.polymc.api.resource.ModdedResources;
+import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
@@ -14,7 +17,16 @@ import rocks.blackblock.polymcplus.polymc.PolyPlusMap;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.server.PolyPlusCommands;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * The main class of the mod
@@ -143,4 +155,70 @@ public class PolyMcPlus implements ModInitializer {
 
 		return mainPolyPlusRegistry;
 	}
+
+	/**
+	 * Copy an entire folder from the resources into the resource pack
+	 *
+	 * @author   Jelle De Loecker   <jelle@elevenways.be>
+	 * @since    0.4.0
+	 */
+	public static void copyAssetDirectoryIntoResourcePack(String namespace, String path, Class clazz, PolyMcResourcePack target_pack, SimpleLogger logger) {
+
+		String full_path = "assets/" + namespace + "/" + path + "/";
+
+		final File jar_file = new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+		if (!jar_file.isFile()) {
+			logger.warn("Could not find jar file " + jar_file + " in resources");
+			return;
+		}
+
+		String prefix = "assets/" + namespace + "/";
+
+		try {
+
+			final JarFile jar = new JarFile(jar_file);
+
+			// Get ALL the entires in the jar
+			final Enumeration<JarEntry> entries = jar.entries();
+
+			while (entries.hasMoreElements()) {
+				final String name = entries.nextElement().getName();
+
+				if (name.startsWith(full_path)) {
+
+					// If the name ends with a slash, it's a directory. Skip it
+					if (name.endsWith("/")) {
+						continue;
+					}
+
+					// Remove the prefix
+					String asset_path = name.substring(prefix.length());
+
+					// Get the file url
+					URL file_url = clazz.getResource("/" + name);
+
+					target_pack.setAsset(namespace, asset_path, (outputStream, gson) -> {
+						try (InputStream inputStream = clazz.getResourceAsStream("/" + name)) {
+
+							if (inputStream == null) {
+								logger.warn("Could not find resource " + name + " in jar file " + jar_file);
+								return;
+							}
+
+							inputStream.transferTo(outputStream);
+						}
+					});
+
+				}
+			}
+			jar.close();
+
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }

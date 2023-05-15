@@ -118,6 +118,11 @@ public class ItemBlockPoly implements BlockPoly {
         // We need the modded block's blockstate json info, because we can re-use models that only need rotating
         JBlockState modded_block_state = modded_resources.getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
 
+        if (modded_block_state == null) {
+            PolyMcPlus.LOGGER.error("Modded block " + this.block_id + " doesn't seem to have a blockstate json");
+            return;
+        }
+
         for (BlockState modded_state : modded_states) {
 
             ItemBlockStateInfo info = new ItemBlockStateInfo(modded_state, this);
