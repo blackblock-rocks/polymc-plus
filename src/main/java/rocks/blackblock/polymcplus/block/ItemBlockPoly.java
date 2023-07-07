@@ -113,6 +113,8 @@ public class ItemBlockPoly implements BlockPoly {
      */
     private void processModdedStates(List<BlockState> modded_states, PolyRegistry registry) {
 
+        PolyMcPlus.LOGGER.info("Processing " + modded_states.size() + " states of " + this.block_id);
+
         var modded_resources = new ModdedResourceContainerImpl();
 
         // We need the modded block's blockstate json info, because we can re-use models that only need rotating
@@ -129,8 +131,8 @@ public class ItemBlockPoly implements BlockPoly {
 
             JBlockStateVariant[] modded_variants = modded_block_state.getVariantsBestMatching(modded_state);
 
-            if (modded_variants.length == 0) {
-                PolyMcPlus.LOGGER.error("No variants found for " + modded_state);
+            if (modded_variants == null || modded_variants.length == 0) {
+                PolyMcPlus.LOGGER.error("No model variants found for modded BlockState " + modded_state);
                 continue;
             }
 
@@ -155,8 +157,27 @@ public class ItemBlockPoly implements BlockPoly {
             info.setX(x);
             info.setY(y);
 
-            this.states.put(modded_state, info);
+            this.setBlockStateInfo(modded_state, info);
         }
+    }
+
+    /**
+     * Add info on a modded state
+     *
+     * @since    0.5.0
+     */
+    public void setBlockStateInfo(BlockState modded_state, ItemBlockStateInfo info) {
+        PolyMcPlus.LOGGER.info("Adding info for " + modded_state + ": " + info);
+        this.states.put(modded_state, info);
+    }
+
+    /**
+     * Get ItemBlockStateInfo for the given modded state
+     *
+     * @since    0.5.0
+     */
+    public ItemBlockStateInfo getBlockStateInfo(BlockState modded_state) {
+        return this.states.get(modded_state);
     }
 
     /**
@@ -168,7 +189,7 @@ public class ItemBlockPoly implements BlockPoly {
     @Override
     public BlockState getClientBlock(BlockState modded_state) {
 
-        ItemBlockStateInfo info = this.states.get(modded_state);
+        ItemBlockStateInfo info = this.getBlockStateInfo(modded_state);
 
         if (info != null) {
             return info.getClientCollisionState();
@@ -196,7 +217,7 @@ public class ItemBlockPoly implements BlockPoly {
      */
     @Override
     public Wizard createWizard(WizardInfo wizard_info) {
-        ItemBlockStateInfo info = this.states.get(wizard_info.getBlockState());
+        ItemBlockStateInfo info = this.getBlockStateInfo(wizard_info.getBlockState());
         return new ItemBlockWizard(info, wizard_info);
     }
 
@@ -339,7 +360,16 @@ public class ItemBlockPoly implements BlockPoly {
             // Add an override into the vanilla item's model that references the modded one
             client_item_model.getOverrides().add(JModelOverride.ofCMD(this.states_cmd_values.get(modded_state), polyplus_item_location));
         }
+    }
 
+    /**
+     * String representation of this instance
+     *
+     * @since    0.5.0
+     */
+    @Override
+    public String toString() {
+        return "ItemBlockPoly{" + this.block_id + ",states=" + this.states + "}";
     }
 
     /**
@@ -564,6 +594,16 @@ public class ItemBlockPoly implements BlockPoly {
          */
         public ItemStack getClientStack() {
             return this.cached_client_stack.get();
+        }
+
+        /**
+         * String representation of this instance
+         *
+         * @since    0.5.0
+         */
+        @Override
+        public String toString() {
+            return "ItemBlockStateInfo{modded_state=" + this.modded_state + ",client_item=" + this.getClientStack() + ",client_collision_state=" + this.client_collision_state + "}";
         }
     }
 

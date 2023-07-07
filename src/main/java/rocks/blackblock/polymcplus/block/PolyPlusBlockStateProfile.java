@@ -60,6 +60,12 @@ public class PolyPlusBlockStateProfile {
     // Soul Campfire states
     public static final BlockStateProfile SOUL_CAMPFIRE_PROFILE = BlockStateProfile.newProfile("soul campfire profiles", SoulCampfireFilters.SOUL_CAMPFIRE_BLOCKS, SoulCampfireFilters.SOUL_CAMPFIRE_FILTER, SoulCampfireFilters.SOUL_CAMPFIRE_ON_FIRST_REGISTER);
 
+    // Turtle egg states
+    public static final BlockStateProfile TURTLE_EGG_PROFILE = BlockStateProfile.newProfile("turtle egg profiles", TurtleEggFilters.TURTLE_EGG_BLOCKS, TurtleEggFilters.TURTLE_EGG_FILTER, TurtleEggFilters.TURTLE_EGG_ON_FIRST_REGISTER);
+
+    // Potted plant states
+    public static final BlockStateProfile POTTED_PLANT_PROFILE = BlockStateProfile.newProfile("potted plant profiles", PottedPlantFilters.POTTED_PLANT_BLOCKS, PottedPlantFilters.POTTED_PLANT_FILTER, PottedPlantFilters.POTTED_PLANT_ON_FIRST_REGISTER);
+
     // Plant root states
     public static final BlockStateProfile PLANT_ROOT_PROFILE = BlockStateProfile.newProfile("plant root profiles", PlantRootFilters.PLANT_BLOCKS, PlantRootFilters.PLANT_AGE_FILTER, PlantRootFilters.PLANT_ROOT_ON_FIRST_REGISTER);
 

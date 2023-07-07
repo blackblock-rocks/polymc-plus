@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
  * @author   Jelle De Loecker   <jelle@elevenways.be>
  * @since    0.2.0
  */
+@SuppressWarnings("unused")
 public class WizardBlockPoly extends PlusFunctionBlockStatePoly {
 
     // The function that will actually create the wizard

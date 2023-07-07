@@ -45,6 +45,8 @@ public class PolyPlusRegistry extends PolyRegistry {
     public BlockState INVISIBLE_CACTUS = null;
     public BlockState INVISIBLE_CAMPFIRE = null;
     public BlockState INVISIBLE_WATERLOGGED_CAMPFIRE = null;
+    public BlockState INVISIBLE_TURTLE_EGG = null;
+    public BlockState INVISIBLE_POTTED_PLANT = null;
     private boolean registered = false;
 
     /**
@@ -125,6 +127,34 @@ public class PolyPlusRegistry extends PolyRegistry {
         }
 
         return this.INVISIBLE_CACTUS;
+    }
+
+    /**
+     * Invisible turtle egg state
+     *
+     * @since    0.5.0
+     */
+    public BlockState getInvisibleTurtleEggState() {
+
+        if (this.INVISIBLE_TURTLE_EGG == null) {
+            this.INVISIBLE_TURTLE_EGG = this.requestBlockState(PolyPlusBlockStateProfile.TURTLE_EGG_PROFILE);
+        }
+
+        return this.INVISIBLE_TURTLE_EGG;
+    }
+
+    /**
+     * Invisible potted plant state
+     *
+     * @since    0.5.0
+     */
+    public BlockState getInvisiblePottedPlantState() {
+
+        if (this.INVISIBLE_POTTED_PLANT == null) {
+            this.INVISIBLE_POTTED_PLANT = this.requestBlockState(PolyPlusBlockStateProfile.POTTED_PLANT_PROFILE);
+        }
+
+        return this.INVISIBLE_POTTED_PLANT;
     }
 
     /**
@@ -348,6 +378,14 @@ public class PolyPlusRegistry extends PolyRegistry {
             states.add(this.INVISIBLE_WATERLOGGED_CAMPFIRE);
         }
 
+        if (this.INVISIBLE_TURTLE_EGG != null) {
+            states.add(this.INVISIBLE_TURTLE_EGG);
+        }
+
+        if (this.INVISIBLE_POTTED_PLANT != null) {
+            states.add(this.INVISIBLE_POTTED_PLANT);
+        }
+
         for (BlockState client_state : states) {
             Block client_block = client_state.getBlock();
             Identifier client_block_id = Registries.BLOCK.getId(client_block);
@@ -370,13 +408,14 @@ public class PolyPlusRegistry extends PolyRegistry {
 
         double min_y = shape.getMin(Direction.Axis.Y);
         double max_y = shape.getMax(Direction.Axis.Y);
+        boolean do_egg = "egg".equals(preferred_collision_type);
         boolean do_stairs = "stairs".equals(preferred_collision_type);
         boolean do_bed = "bed".equals(preferred_collision_type);
         boolean do_cactus = "cactus".equals(preferred_collision_type);
         boolean do_campfire = "campfire".equals(preferred_collision_type);
         boolean do_full_transparent = "full_transparent".equals(preferred_collision_type);
         boolean is_waterlogged = false;
-        boolean blocks_light = modded_state.getMaterial().blocksLight();
+        boolean blocks_light = modded_state.isOpaque();
 
         if (modded_state.contains(Properties.WATERLOGGED)) {
             is_waterlogged = modded_state.get(Properties.WATERLOGGED);
@@ -413,6 +452,8 @@ public class PolyPlusRegistry extends PolyRegistry {
 
         if (do_full_transparent) {
             state = this.getInvisibleFullTransparentBlock();
+        } else if (do_egg) {
+            state = this.getInvisibleTurtleEggState();
         } else if (do_campfire) {
             if (is_waterlogged) {
                 state = this.getInvisibleWaterloggedCampfireState();

@@ -194,7 +194,7 @@ public class MushroomFilters {
         Block block = clientState.getBlock();
 
         // See if the client-side blockstate has a non-sheared face on the opposite side of the updated block
-        boolean hasNonShearedFace = BlockStateProfile.hasBooleanDirection(clientState, direction.getOpposite());
+        boolean hasNonShearedFace = MushroomFilters.hasBooleanDirection(clientState, direction.getOpposite());
 
         if (hasNonShearedFace) {
 
@@ -228,7 +228,17 @@ public class MushroomFilters {
      * @author   Jelle De Loecker   <jelle@elevenways.be>
      */
     public static boolean hasBooleanDirection(BlockState state, Direction direction) {
+
+        if (state == null || direction == null) {
+            return false;
+        }
+
         BooleanProperty booleanProperty = ConnectingBlock.FACING_PROPERTIES.get(direction);
+
+        if (booleanProperty == null) {
+            return false;
+        }
+
         return state.contains(booleanProperty) && state.get(booleanProperty);
     }
 }

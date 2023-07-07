@@ -21,6 +21,7 @@ import rocks.blackblock.polymcplus.block.WallFilters;
 import rocks.blackblock.polymcplus.compatibility.PolyCompatibility;
 import rocks.blackblock.polymcplus.compatibility.PolyvalentCompatibility;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
+import rocks.blackblock.polymcplus.tools.MaterialLookup;
 
 import java.util.function.BiFunction;
 
@@ -139,8 +140,12 @@ public class BlockPolyPlusGenerator {
         //Get the state's collision shape.
         VoxelShape collisionShape = getCollisionShape(moddedState);
 
+        boolean is_full_cube = Block.isShapeFullCube(collisionShape);
+        boolean tried_mushrooms = false;
+        MaterialLookup.Type material_type = null;
+
         // == FULL BLOCKS ==
-        if (Block.isShapeFullCube(collisionShape) && isOpaque) {
+        if (is_full_cube && isOpaque) {
 
             // Full blocks that have BlockEntities are probably interactive in some way,
             // use vanilla blocks that by default respond to mouse interaction
@@ -151,10 +156,10 @@ public class BlockPolyPlusGenerator {
                 } catch (BlockStateManager.StateLimitReachedException ignored) {}
             }
 
-            Material moddedMaterial = moddedState.getMaterial();
+            material_type = MaterialLookup.getMaterial(moddedState);
 
             // If the modded block is stone-like, try to use vanilla stone blocks
-            if (moddedMaterial.equals(Material.STONE)) {
+            if (material_type == MaterialLookup.Type.STONE) {
                 try {
                     isUniqueCallback.set(true);
                     return manager.requestBlockState(PolyPlusBlockStateProfile.FULL_BLOCK_STONE_PROFILE);
@@ -183,11 +188,15 @@ public class BlockPolyPlusGenerator {
             try {
                 isUniqueCallback.set(true);
                 return manager.requestBlockState(PolyPlusBlockStateProfile.FULL_BLOCK_MUSHROOM_PROFILE);
-            } catch (BlockStateManager.StateLimitReachedException ignored) {}
+            } catch (BlockStateManager.StateLimitReachedException ignored) {
+                tried_mushrooms = true;
+            }
         }
 
+        boolean has_collision = !collisionShape.isEmpty();
+
         // == NO COLLISION BLOCKS ==
-        if (collisionShape.isEmpty() && !(moddedBlock instanceof WallBlock)) {
+        if (!has_collision && !(moddedBlock instanceof WallBlock)) {
             var outlineShape = moddedState.getOutlineShape(fakeWorld, BlockPos.ORIGIN);
 
             if (moddedBlock instanceof AbstractRailBlock) {
@@ -259,7 +268,15 @@ public class BlockPolyPlusGenerator {
         BlockState result = BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
 
         if (result == DEFAULT_STONE) {
-            System.out.println(" -- Default stone! Returning null for " + moddedState);
+            PolyMcPlus.LOGGER.warn("Failed to find a Poly client state for modded block " + moddedState.getBlock());
+            PolyMcPlus.LOGGER.warn(" »» Specific modded BlockState: " + moddedState);
+            PolyMcPlus.LOGGER.warn(" »» Is full cube    : " + is_full_cube);
+            PolyMcPlus.LOGGER.warn(" »» Material type   : " + material_type);
+            PolyMcPlus.LOGGER.warn(" »» Has collisions  : " + has_collision);
+            PolyMcPlus.LOGGER.warn(" »» Wall-axis       : " + wall_axis);
+            PolyMcPlus.LOGGER.warn(" »» Tried mushrooms : " + tried_mushrooms);
+            PolyMcPlus.LOGGER.warn(" »» Is opaque       : " + isOpaque);
+
             return null;
         }
 

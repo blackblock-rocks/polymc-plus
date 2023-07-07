@@ -116,7 +116,7 @@ public class PolyPlusMap implements PolyMap {
         }
 
         for (ItemTransformer globalPoly : globalItemPolys) {
-            ret = globalPoly.transform(ret, player, location);
+            ret = globalPoly.transform(serverItem, ret, player, location);
         }
 
         if ((player == null || player.isCreative()) && !ItemStack.canCombine(serverItem, ret) && !serverItem.isEmpty()) {

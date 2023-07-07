@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.wizard.TestVirtualEntity;
 import rocks.blackblock.polymcplus.wizard.VArmorStand;
+import rocks.blackblock.polymcplus.wizard.VItemDisplay;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -119,8 +120,10 @@ public class PolyPlusCommands {
                                                 entity = new VArmorStand();
                                             } else if (scope_slug.equals("itemframe")) {
                                                 entity = new VItemFrame();
+                                            } else if (scope_slug.equals("itemdisplay")) {
+                                                entity = new VItemDisplay();
                                             } else {
-                                                source.sendError(Text.literal("Type must be 'armorstand' or 'itemframe'."));
+                                                source.sendError(Text.literal("Type must be 'armorstand', 'itemframe' or 'itemdisplay'."));
                                                 return 0;
                                             }
 
@@ -137,6 +140,9 @@ public class PolyPlusCommands {
                                                 //vItemFrame.makeInvisible(consumer);
                                                 vItemFrame.sendItemStack(consumer, Items.STONE.getDefaultStack());
                                                 vItemFrame.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                                            } else if (entity instanceof VItemDisplay vItemDisplay) {
+                                                vItemDisplay.setItem(consumer, Items.STONE.getDefaultStack());
+                                                vItemDisplay.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
                                             }
                                         }
 
@@ -180,7 +186,7 @@ public class PolyPlusCommands {
 
                         ServerCommandSource source = context.getSource();
                         ServerPlayerEntity player = source.getPlayer();
-                        ServerWorld world = player.getWorld();
+                        ServerWorld world = player.getServerWorld();
 
                         if (!player.isCreative()) {
                             source.sendError(Text.literal("You have to do this in Creative mode. This will ruin these chunks! Don't do it on live environment."));
@@ -225,7 +231,8 @@ public class PolyPlusCommands {
                             }
                         }
 
-                        source.sendFeedback(Text.literal("Set " + air_blocks + " blocks to air. Doing BlockStates next"), false);
+                        int finalAir_blocks = air_blocks;
+                        source.sendFeedback(() -> Text.literal("Set " + finalAir_blocks + " blocks to air. Doing BlockStates next"), false);
 
                         // And now paste all the blockstates
                         for (int x = -799; x < 1590; x += 3) {
@@ -261,7 +268,8 @@ public class PolyPlusCommands {
                             }
                         }
 
-                        source.sendFeedback(Text.literal("Generated " + count + " blockstates into the world of a total of " + state_count), false);
+                        int finalCount = count;
+                        source.sendFeedback(() -> Text.literal("Generated " + finalCount + " blockstates into the world of a total of " + state_count), false);
 
                         return 1;
                     }))
