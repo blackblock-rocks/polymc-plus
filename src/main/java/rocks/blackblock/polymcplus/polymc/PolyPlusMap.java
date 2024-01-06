@@ -267,10 +267,8 @@ public class PolyPlusMap implements PolyMap {
      */
     @Override
     public @Nullable PolyMcResourcePack generateResourcePack(SimpleLogger logger) {
-        var moddedResources = new ModdedResourceContainerImpl();
+        var moddedResources = PolyMcPlus.getModdedResources();
         var pack = new ResourcePackImplementation();
-
-        logger.info("Using: "+moddedResources);
 
         this.registry.generateDefaultResources(moddedResources, pack, logger);
 

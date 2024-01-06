@@ -6,7 +6,9 @@ import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
+import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.jetbrains.annotations.ApiStatus;
@@ -35,6 +37,10 @@ import java.util.jar.JarFile;
  * @since    0.1.0
  */
 public class PolyMcPlus implements ModInitializer {
+
+	// A reusable ModdedResources container
+	private static ModdedResources modded_resources = null;
+
 	public static final Logger LOGGER = LoggerFactory.getLogger("polymc-plus");
 	private static PolyPlusRegistry mainPolyPlusRegistry = null;
 	private static PolyPlusMap mainPolyPlusMap = null;
@@ -55,6 +61,20 @@ public class PolyMcPlus implements ModInitializer {
 	 */
 	public static MinecraftDedicatedServer getServer() {
 		return server;
+	}
+
+	/**
+	 * Get a ModdedResources container.
+	 *
+	 * @author   Jelle De Loecker   <jelle@elevenways.be>
+	 * @since    0.5.1
+	 */
+	public static ModdedResources getModdedResources() {
+		if (modded_resources == null) {
+			modded_resources = new ModdedResourceContainerImpl();
+		}
+
+		return modded_resources;
 	}
 
 	/**
@@ -82,6 +102,19 @@ public class PolyMcPlus implements ModInitializer {
 		PolyMapProvider.EVENT.register(player -> getGeneratedMap());
 
 		PolyPlusCommands.registerCommands();
+
+		// Make sure the shared modded resources instance
+		// (with loaded client jar, probably) is closed
+		ServerLifecycleEvents.SERVER_STARTED.register(server1 -> {
+			if (modded_resources != null) {
+				try {
+					modded_resources.close();
+				} catch (Exception e) {
+					// Ignore
+				}
+				modded_resources = null;
+			}
+		});
 	}
 
 	/**

@@ -19,6 +19,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import rocks.blackblock.polymcplus.PolyMcPlus;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -95,6 +96,8 @@ public class FallbackItemBlockPoly implements BlockPoly {
                 this.unique_client_blocks.add(client_state);
             }
         });
+
+        PolyMcPlus.LOGGER.debug("Parsing " + leftover_states.size() + " leftover states");
 
         this.parseLeftoverStates(leftover_states, registry);
 

@@ -4,8 +4,10 @@ import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.wizard.Wizard;
 import io.github.theepicblock.polymc.api.wizard.WizardInfo;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
+import net.minecraft.block.BambooBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.generator.BlockPolyPlusGenerator;
 
 import java.util.function.BiFunction;
@@ -111,6 +113,4 @@ public class WizardBlockPoly extends PlusFunctionBlockStatePoly {
         ItemBlockPoly item_block_poly = new ItemBlockPoly(modded_block, registry, collision_type);
         registry.registerBlockPoly(modded_block, item_block_poly);
     }
-
-
 }

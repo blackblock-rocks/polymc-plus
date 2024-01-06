@@ -113,12 +113,8 @@ public class ItemBlockPoly implements BlockPoly {
      */
     private void processModdedStates(List<BlockState> modded_states, PolyRegistry registry) {
 
-        PolyMcPlus.LOGGER.info("Processing " + modded_states.size() + " states of " + this.block_id);
-
-        var modded_resources = new ModdedResourceContainerImpl();
-
         // We need the modded block's blockstate json info, because we can re-use models that only need rotating
-        JBlockState modded_block_state = modded_resources.getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
+        JBlockState modded_block_state = PolyMcPlus.getModdedResources().getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
 
         if (modded_block_state == null) {
             PolyMcPlus.LOGGER.error("Modded block " + this.block_id + " doesn't seem to have a blockstate json");
@@ -167,7 +163,6 @@ public class ItemBlockPoly implements BlockPoly {
      * @since    0.5.0
      */
     public void setBlockStateInfo(BlockState modded_state, ItemBlockStateInfo info) {
-        PolyMcPlus.LOGGER.info("Adding info for " + modded_state + ": " + info);
         this.states.put(modded_state, info);
     }
 

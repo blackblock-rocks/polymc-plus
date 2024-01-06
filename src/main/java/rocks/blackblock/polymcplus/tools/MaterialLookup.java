@@ -8,19 +8,63 @@ import net.minecraft.sound.BlockSoundGroup;
  */
 public class MaterialLookup {
 
+    /**
+     * Get the material of a Block and its specific BlockState
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public static Type getMaterial(Block block, BlockState state) {
 
-        if (block instanceof GlassBlock || block instanceof PaneBlock) {
+        if (block instanceof StainedGlassBlock || block instanceof PaneBlock) {
             return Type.GLASS;
         }
 
-        return getMaterial(block.getSoundGroup(state));
+        Type result = getMaterial(block.getSoundGroup(state));
+
+        // Make sure it's glass
+        if (result == Type.GLASS) {
+            // Check if it's ice
+            if (block instanceof IceBlock || block == Blocks.PACKED_ICE) {
+                result = Type.ICE;
+            }
+
+            // Default slipperiness is 0.6f
+            if (block.getSlipperiness() > 0.6f) {
+                result = Type.OTHER;
+            }
+        }
+
+        return result;
     }
 
+    /**
+     * Get the material of a BlockState
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
+    public static Type getMaterial(BlockState blockState) {
+        return getMaterial(blockState.getBlock(), blockState);
+    }
+
+    /**
+     * Get the material of a Block (using its default state)
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public static Type getMaterial(Block block) {
         return getMaterial(block, block.getDefaultState());
     }
 
+    /**
+     * Get the (most likely) material of a BlockSoundGroup.
+     * This is not 100% accurate (like in the case of ice being glass)
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public static Type getMaterial(BlockSoundGroup soundGroup) {
 
         if (soundGroup == BlockSoundGroup.METAL) {
@@ -48,13 +92,20 @@ public class MaterialLookup {
             return Type.DIRT;
         }
 
+        if (soundGroup == BlockSoundGroup.GLASS) {
+            // This includes ice and nether portals
+            return Type.GLASS;
+        }
+
         return null;
     }
 
-    public static Type getMaterial(BlockState blockState) {
-        return getMaterial(blockState.getBlock(), blockState);
-    }
-
+    /**
+     * Get the material of a DoorBlock (using its default state)
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public static Type getMaterial(DoorBlock block) {
         Type result = getMaterial(block.getBlockSetType());
 
@@ -65,6 +116,12 @@ public class MaterialLookup {
         return result;
     }
 
+    /**
+     * Get the material of a BlockSetType
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public static Type getMaterial(BlockSetType blockSetType) {
 
         Type result = null;
@@ -92,6 +149,12 @@ public class MaterialLookup {
         return result;
     }
 
+    /**
+     * All of our possible material types
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.5.0
+     */
     public enum Type {
         METAL,
         WOOD,
@@ -102,6 +165,7 @@ public class MaterialLookup {
         WOOL,
         LEAVES,
         PLANT,
-        OTHER
+        OTHER,
+        ICE
     }
 }
