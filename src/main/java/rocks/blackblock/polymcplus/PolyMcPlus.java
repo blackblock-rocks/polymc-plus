@@ -78,6 +78,27 @@ public class PolyMcPlus implements ModInitializer {
 	}
 
 	/**
+	 * Release the ModdedResources container.
+	 *
+	 * @author   Jelle De Loecker   <jelle@elevenways.be>
+	 * @since    0.5.1
+	 */
+	public static void releaseModdedResources() {
+
+		if (modded_resources == null) {
+			return;
+		}
+
+		try {
+			modded_resources.close();
+		} catch (Exception e) {
+			LOGGER.error("Failed to close modded resources", e);
+		} finally {
+			modded_resources = null;
+		}
+	}
+
+	/**
 	 * Get the current tick count
 	 */
 	public static int getTick() {

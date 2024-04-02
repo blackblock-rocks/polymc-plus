@@ -60,6 +60,10 @@ public class PolyPlusCommands {
                                     .executes((context -> {
                                         SimpleLogger commandSource = new CommandSourceLogger(context.getSource(), true);
                                         ErrorTrackerWrapper logger = new ErrorTrackerWrapper(PolyMc.LOGGER);
+
+                                        // Release any existing modded resource instance
+                                        PolyMcPlus.releaseModdedResources();
+
                                         try {
                                             commandSource.info("Generating Polyplus resource pack...");
                                             ResourcePackGenerator.generate(PolyMcPlus.getMainMap(), "resource_polyplus", logger);
@@ -72,6 +76,8 @@ public class PolyPlusCommands {
                                             commandSource.error("An error occurred whilst trying to generate the resource pack! Please check the console.");
                                             e.printStackTrace();
                                             return 0;
+                                        } finally {
+                                            PolyMcPlus.releaseModdedResources();
                                         }
                                         if (logger.errors != 0) {
                                             commandSource.error("There have been errors whilst generating the resource pack. These are usually completely normal. It only means that PolyMc couldn't find some of the textures or models. See the console for more info.");
