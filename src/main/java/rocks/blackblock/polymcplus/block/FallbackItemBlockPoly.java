@@ -218,20 +218,34 @@ public class FallbackItemBlockPoly implements BlockPoly {
             JBlockStateVariant[] modded_variants = modded_json_state.getVariantsBestMatching(modded_state);
 
             // Skip the state if no variants are defined for it
-            if (modded_variants == null) {
-                return;
+            if (modded_variants != null) {
+
+                try {
+                    client_json_state.setVariant(client_state_string, modded_variants);
+                } catch (Exception e) {
+                    logger.error("Error while setting variant for " + client_block_id + " " + client_state_string + " to " + modded_variants + " of modded state " + modded_state);
+                    e.printStackTrace();
+
+                    logger.error("Modded blockstate: " + modded_state);
+                }
+
+                pack.importRequirements(modded_resources, modded_variants, logger);
             }
 
-            try {
-                client_json_state.setVariant(client_state_string, modded_variants);
-            } catch (Exception e) {
-                logger.error("Error while setting variant for "+client_block_id+" "+client_state_string+" to "+modded_variants + " of modded state " + modded_state);
-                e.printStackTrace();
+            JBlockStateVariant[] modded_multipart_variants = modded_json_state.getMultipartVariantsBestMatching(modded_state);
 
-                logger.error("Modded blockstate: "+modded_state);
+            if (modded_multipart_variants != null) {
+                try {
+                    client_json_state.setMultipart(client_state_string, modded_multipart_variants);
+                } catch (Exception e) {
+                    logger.error("Error while setting multipart variant for " + client_block_id + " " + client_state_string + " to " + modded_variants + " of modded state " + modded_state);
+                    e.printStackTrace();
+
+                    logger.error("Modded blockstate: " + modded_state);
+                }
+
+                pack.importRequirements(modded_resources, modded_multipart_variants, logger);
             }
-
-            pack.importRequirements(modded_resources, modded_variants, logger);
 
             seen_client_states.add(client_state);
         });

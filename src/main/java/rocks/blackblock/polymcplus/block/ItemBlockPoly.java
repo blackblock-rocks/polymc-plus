@@ -8,7 +8,6 @@ import io.github.theepicblock.polymc.api.resource.json.*;
 import io.github.theepicblock.polymc.api.wizard.Wizard;
 import io.github.theepicblock.polymc.api.wizard.WizardInfo;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
-import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
 import io.github.theepicblock.polymc.impl.resource.json.JModelImpl;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,9 +40,6 @@ public class ItemBlockPoly implements BlockPoly {
     // All the ItemCMDs in use
     protected final Map<String, ItemCMD> model_to_cmd = new HashMap<>();
 
-    protected final Map<BlockState, Integer> states_cmd_values;
-    protected final Map<BlockState, Item> states_client_items;
-    protected final Map<BlockState, ThreadLocal<ItemStack>> states_cached_items;
     protected final Block modded_block;
     protected final Identifier block_id;
     protected PolyPlusRegistry poly_plus_registry = null;
@@ -95,10 +91,6 @@ public class ItemBlockPoly implements BlockPoly {
 
         this.preferred_collision_type = collision_type;
 
-        this.states_cmd_values = new HashMap<>();
-        this.states_client_items = new HashMap<>();
-        this.states_cached_items = new HashMap<>();
-
         this.modded_block = modded_states.get(0).getBlock();
         this.block_id = Registries.BLOCK.getId(this.modded_block);
 
@@ -125,33 +117,43 @@ public class ItemBlockPoly implements BlockPoly {
 
             ItemBlockStateInfo info = new ItemBlockStateInfo(modded_state, this);
 
+            // @TODO: If we actually get multiple "variants" (not "multiparts"),
+            // only 1 of those variants should be rendered (at random)
             JBlockStateVariant[] modded_variants = modded_block_state.getVariantsBestMatching(modded_state);
+
+            if (modded_variants == null || modded_variants.length == 0) {
+                modded_variants = modded_block_state.getMultipartVariantsBestMatching(modded_state);
+            }
 
             if (modded_variants == null || modded_variants.length == 0) {
                 PolyMcPlus.LOGGER.error("No model variants found for modded BlockState " + modded_state);
                 continue;
             }
 
-            JBlockStateVariant best_variant = modded_variants[0];
+            // Add all the variants
+            for (JBlockStateVariant variant : modded_variants) {
 
-            Integer x = best_variant.x();
-            Integer y = best_variant.y();
-            String model = best_variant.model();
-            ItemCMD item_cmd = null;
+                Integer x = variant.x();
+                Integer y = variant.y();
+                String model = variant.model();
+                ItemCMD item_cmd = null;
 
-            if (this.model_to_cmd.containsKey(model)) {
-                item_cmd = this.model_to_cmd.get(model);
-            } else {
-                Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
-                Item client_item = pair.getLeft();
-                Integer cmd_value = pair.getRight();
-                item_cmd = new ItemCMD(client_item, cmd_value);
-                this.model_to_cmd.put(model, item_cmd);
+                if (this.model_to_cmd.containsKey(model)) {
+                    item_cmd = this.model_to_cmd.get(model);
+                } else {
+                    Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
+                    Item client_item = pair.getLeft();
+                    Integer cmd_value = pair.getRight();
+                    item_cmd = new ItemCMD(client_item, cmd_value);
+                    this.model_to_cmd.put(model, item_cmd);
+                }
+
+                ItemBlockStateInfo.RotatedItemCMD rotated = info.addClientItem(item_cmd);
+                rotated.setX(x);
+                rotated.setY(y);
             }
 
-            info.setClientItem(item_cmd);
-            info.setX(x);
-            info.setY(y);
+            info.generateThreadsafeRotatedItemCmds();
 
             this.setBlockStateInfo(modded_state, info);
         }
@@ -244,12 +246,16 @@ public class ItemBlockPoly implements BlockPoly {
             // Get the model that the modded block state uses
             JBlockStateVariant[] modded_variants = modded_block_state.getVariantsBestMatching(modded_state);
 
-            if (modded_variants == null) {
-                continue;
+            if (modded_variants != null) {
+                // Make sure these block models are imported: the item will use these models
+                pack.importRequirements(modded_resources, modded_variants, logger);
             }
 
-            // Make sure these block models are imported: the item will use these models
-            pack.importRequirements(modded_resources, modded_variants, logger);
+            JBlockStateVariant[] modded_multipart_variants = modded_block_state.getMultipartVariantsBestMatching(modded_state);
+
+            if (modded_multipart_variants != null) {
+                pack.importRequirements(modded_resources, modded_multipart_variants, logger);
+            }
         }
 
         int counter = -1;
@@ -285,79 +291,6 @@ public class ItemBlockPoly implements BlockPoly {
     }
 
     /**
-     * Add new CMD item overrides for all the given states
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
-    public void old_addToResourcePack(List<BlockState> modded_states, ModdedResources modded_resources, PolyMcResourcePack pack, SimpleLogger logger) {
-
-        Block modded_block = modded_states.get(0).getBlock();
-        Identifier modded_block_id = Registries.BLOCK.getId(modded_block);
-        JBlockState modded_block_state = modded_resources.getBlockState(modded_block_id.getNamespace(), modded_block_id.getPath());
-
-        if (modded_block_state == null) {
-            logger.error("Can't find blockstate definition for "+modded_block_id+", can't generate resources for it");
-            return;
-        }
-
-        HashSet<BlockState> client_states_done = new HashSet<>();
-        int state_nr = -1;
-
-        for (BlockState modded_state : modded_states) {
-            state_nr++;
-
-            // Get the model that the modded block state uses
-            JBlockStateVariant[] modded_variants = modded_block_state.getVariantsBestMatching(modded_state);
-
-            if (modded_variants == null) {
-                continue;
-            }
-
-            System.out.println("Fount variants for " + modded_state);
-
-            // Make sure these block models are imported: the item will use these models
-            pack.importRequirements(modded_resources, modded_variants, logger);
-
-            Item client_item = this.states_client_items.get(modded_state);
-            Identifier client_item_id = Registries.ITEM.getId(client_item);
-
-            // Copy and retrieve the vanilla item's model
-            JModel client_item_model = pack.getOrDefaultVanillaItemModel(modded_resources, client_item_id.getNamespace(), client_item_id.getPath(), logger);
-
-            String item_model_name = modded_block_id.getPath() + "_" + state_nr;
-            String polyplus_item_location = "polymcplus:item/" + item_model_name;
-
-            JBlockStateVariant best_variant = modded_variants[0];
-
-            if (best_variant == null) {
-                continue;
-            }
-
-            String model_location = best_variant.model();
-
-            int x = best_variant.x();
-            int y = best_variant.y();
-
-            JModel frame_model = new JModelImpl();
-            frame_model.setParent(model_location);
-
-            double[] rotation = {x,y,0};
-            double[] translation = {0, 0, -16};
-            double[] scale = {2, 2, 2};
-
-            JModelDisplay display = new JModelDisplay(rotation, translation, scale);
-            frame_model.setDisplay(JModelDisplayType.FIXED, display);
-
-
-            pack.setItemModel("polymcplus", item_model_name, frame_model);
-
-            // Add an override into the vanilla item's model that references the modded one
-            client_item_model.getOverrides().add(JModelOverride.ofCMD(this.states_cmd_values.get(modded_state), polyplus_item_location));
-        }
-    }
-
-    /**
      * String representation of this instance
      *
      * @since    0.5.0
@@ -365,297 +298,6 @@ public class ItemBlockPoly implements BlockPoly {
     @Override
     public String toString() {
         return "ItemBlockPoly{" + this.block_id + ",states=" + this.states + "}";
-    }
-
-    /**
-     * Info per blockstate
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
-    public static class ItemBlockStateInfo {
-
-        // The actual modded state this represents
-        protected BlockState modded_state;
-
-        // The ItemBlockPoly
-        protected ItemBlockPoly poly;
-
-        // The ItemCMD
-        protected ItemCMD item_cmd;
-
-        // The cached itemstack to send to the client
-        protected ThreadLocal<ItemStack> cached_client_stack = null;
-
-        // The X value
-        protected Integer x = null;
-
-        // The Y value
-        protected Integer y = null;
-
-        // The calculated yaw
-        protected int yaw;
-
-        // The calculated pitch
-        protected int pitch;
-
-        // The client collision blockstate
-        protected BlockState client_collision_state = null;
-
-        // The preferred collision shape to use
-        protected VoxelShape preferred_collision_shape = null;
-
-        /**
-         * Initialize this instance
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public ItemBlockStateInfo(BlockState modded_state, ItemBlockPoly poly) {
-            this.modded_state = modded_state;
-            this.poly = poly;
-            this.generateClientCollisionState();
-        }
-
-        /**
-         * Set the item & CMD value to use
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public void setClientItem(Item client_item, int cmd_value) {
-            this.setClientItem(new ItemCMD(client_item, cmd_value));
-        }
-
-        /**
-         * Set the item & CMD value to use
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public void setClientItem(ItemCMD item_cmd) {
-            this.item_cmd = item_cmd;
-            this.generateClientStack();
-        }
-
-        /**
-         * Get the preferred collision type
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public String getPreferredCollisionType() {
-            return this.poly.preferred_collision_type;
-        }
-
-        /**
-         * Generate the client-side blockstate to use as a basis
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        private void generateClientCollisionState() {
-            if (this.poly.poly_plus_registry != null) {
-                this.client_collision_state = this.poly.poly_plus_registry.findInvisibleCollisionState(this);
-            } else {
-                this.client_collision_state = this.poly.barrier_state;
-            }
-        }
-
-        /**
-         * Get the modded BlockState
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public BlockState getModdedState() {
-            return this.modded_state;
-        }
-
-        /**
-         * Get the BlockState to use for the collision.
-         * This should ideally be an invisible state.
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public BlockState getClientCollisionState() {
-            return this.client_collision_state;
-        }
-
-        /**
-         * Set the X value
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public void setX(Integer x) {
-            this.x = x;
-
-            if (x == null || x == 0) {
-                this.pitch = 0;
-            } else {
-                this.pitch = (x + 180) % 360;
-            }
-        }
-
-        /**
-         * Get the X value
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public int getX() {
-            return this.x;
-        }
-
-        /**
-         * Set the Y rotation value
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public void setY(Integer y) {
-            this.y = y;
-
-            if (y == null) {
-                this.yaw = 0;
-            } else {
-                this.yaw = (y + 180) % 360;
-            }
-        }
-
-        /**
-         * Get the Y value
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public int getY() {
-            return this.y;
-        }
-
-        /**
-         * Get the yaw rotation
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public int getYaw() {
-            return this.yaw;
-        }
-
-        /**
-         * Get the pitch rotation
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.4.0
-         */
-        public int getPitch() {
-            return this.pitch;
-        }
-
-        /**
-         * Generate the threadsafe client stack
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        private void generateClientStack() {
-            this.cached_client_stack = ThreadLocal.withInitial(() -> {
-                var stack = new ItemStack(this.item_cmd.client_item);
-                NbtCompound tag = stack.getOrCreateNbt();
-                tag.putInt("CustomModelData", this.item_cmd.cmd_value);
-                stack.setNbt(tag);
-                return stack;
-            });
-        }
-
-        /**
-         * Get the cached stack
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public ThreadLocal<ItemStack> getCachedStack() {
-            return this.cached_client_stack;
-        }
-
-        /**
-         * Return the client itemstack to use
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public ItemStack getClientStack() {
-            return this.cached_client_stack.get();
-        }
-
-        /**
-         * String representation of this instance
-         *
-         * @since    0.5.0
-         */
-        @Override
-        public String toString() {
-            return "ItemBlockStateInfo{modded_state=" + this.modded_state + ",client_item=" + this.getClientStack() + ",client_collision_state=" + this.client_collision_state + "}";
-        }
-    }
-
-    /**
-     * Item & CMD info
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
-    public static class ItemCMD {
-
-        // The client-side replacement item
-        protected Item client_item;
-
-        // The CMD value for the item
-        protected int cmd_value;
-
-        /**
-         * Set the item & CMD value to use
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public ItemCMD(Item client_item, int cmd_value) {
-            this.setClientItem(client_item, cmd_value);
-        }
-
-        /**
-         * Set the item & CMD value to use
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public void setClientItem(Item client_item, int cmd_value) {
-            this.client_item = client_item;
-            this.cmd_value = cmd_value;
-        }
-
-        /**
-         * Get the client item's identifier
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public Identifier getIdentifier() {
-            return Registries.ITEM.getId(this.client_item);
-        }
-
-        /**
-         * String representation of this instance
-         *
-         * @author   Jelle De Loecker   <jelle@elevenways.be>
-         * @since    0.2.0
-         */
-        public String toString() {
-            return "ItemCMD{" + this.cmd_value + "," + this.client_item + "}";
-        }
     }
 
     /**

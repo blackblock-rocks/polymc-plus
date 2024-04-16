@@ -24,6 +24,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import rocks.blackblock.polymcplus.block.ItemBlockPoly;
+import rocks.blackblock.polymcplus.block.ItemBlockStateInfo;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
 import rocks.blackblock.polymcplus.generator.BlockPolyPlusGenerator;
 
@@ -399,7 +400,7 @@ public class PolyPlusRegistry extends PolyRegistry {
         }
     }
 
-    public BlockState findInvisibleCollisionState(ItemBlockPoly.ItemBlockStateInfo info) {
+    public BlockState findInvisibleCollisionState(ItemBlockStateInfo info) {
 
         String preferred_collision_type = info.getPreferredCollisionType();
         BlockState modded_state = info.getModdedState();

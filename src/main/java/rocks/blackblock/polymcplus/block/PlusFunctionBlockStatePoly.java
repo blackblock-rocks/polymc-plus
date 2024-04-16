@@ -104,8 +104,15 @@ public class PlusFunctionBlockStatePoly implements BlockPoly {
             // Get the model that the modded block state uses and assign it to the client block state
             var moddedVariants = moddedBlockState.getVariantsBestMatching(moddedState);
             clientBlockStates.setVariant(clientStateString, moddedVariants);
-
             pack.importRequirements(moddedResources, moddedVariants, logger);
+
+            // Get the multipart models
+            var multipartVariants = moddedBlockState.getMultipartVariantsBestMatching(moddedState);
+
+            if (multipartVariants != null) {
+                clientBlockStates.setMultipart(clientStateString, multipartVariants);
+                pack.importRequirements(moddedResources, multipartVariants, logger);
+            }
 
             clientStatesDone.add(clientState);
         });
