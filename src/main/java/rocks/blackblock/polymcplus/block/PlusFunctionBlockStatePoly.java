@@ -98,7 +98,7 @@ public class PlusFunctionBlockStatePoly implements BlockPoly {
             if (!uniqueClientBlocks.contains(clientState)) return;
 
             var clientBlockId = Registries.BLOCK.getId(clientState.getBlock());
-            var clientBlockStates = pack.getOrDefaultBlockState(clientBlockId.getNamespace(), clientBlockId.getPath());
+            var clientBlockStates = pack.getOrDefaultVanillaBlockState(moddedResources, clientBlockId.getNamespace(), clientBlockId.getPath(), logger);
             var clientStateString = Util.getPropertiesFromBlockState(clientState);
 
             // Get the model that the modded block state uses and assign it to the client block state

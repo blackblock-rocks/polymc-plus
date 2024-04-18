@@ -209,7 +209,7 @@ public class FallbackItemBlockPoly implements BlockPoly {
             // Get the identifier of the block that will be used on the client side
             Identifier client_block_id = Registries.BLOCK.getId(client_state.getBlock());
 
-            JBlockState client_json_state = pack.getOrDefaultBlockState(client_block_id.getNamespace(), client_block_id.getPath());
+            JBlockState client_json_state = pack.getOrDefaultVanillaBlockState(modded_resources, client_block_id.getNamespace(), client_block_id.getPath(), logger);
 
             // Get the string representation of the client block state
             String client_state_string = Util.getPropertiesFromBlockState(client_state);

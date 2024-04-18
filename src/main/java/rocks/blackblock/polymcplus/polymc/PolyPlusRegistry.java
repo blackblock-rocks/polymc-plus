@@ -391,7 +391,7 @@ public class PolyPlusRegistry extends PolyRegistry {
             Block client_block = client_state.getBlock();
             Identifier client_block_id = Registries.BLOCK.getId(client_block);
 
-            JBlockState client_block_states = pack.getOrDefaultBlockState(client_block_id.getNamespace(), client_block_id.getPath());
+            JBlockState client_block_states = pack.getOrDefaultVanillaBlockState(moddedResources, client_block_id.getNamespace(), client_block_id.getPath(), logger);
             String client_state_string = Util.getPropertiesFromBlockState(client_state);
 
             JBlockStateVariant invisible_variant = new JBlockStateVariant("polymcplus:invisible", 0, 0, false);
