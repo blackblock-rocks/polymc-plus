@@ -4,6 +4,7 @@ import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.block.BlockStateManager;
 import io.github.theepicblock.polymc.api.block.BlockStateMerger;
+import io.github.theepicblock.polymc.api.block.BlockStateProfile;
 import io.github.theepicblock.polymc.impl.generator.BlockPolyGenerator;
 import io.github.theepicblock.polymc.impl.misc.BooleanContainer;
 import io.github.theepicblock.polymc.impl.poly.block.SimpleReplacementPoly;
