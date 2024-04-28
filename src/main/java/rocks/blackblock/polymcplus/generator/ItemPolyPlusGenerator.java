@@ -24,6 +24,10 @@ public class ItemPolyPlusGenerator {
 
         if (item instanceof PotionItem){
             return new CustomModelDataPoly(cmdManager, item, Items.MILK_BUCKET);
+        } else if (item instanceof WrittenBookItem) {
+            return new CustomModelDataPoly(cmdManager, item, Items.WRITTEN_BOOK);
+        } else if (item instanceof WritableBookItem) {
+            return new CustomModelDataPoly(cmdManager, item, Items.WRITABLE_BOOK);
         }
 
         // Fall back to the basic PolyMc implementation
