@@ -45,7 +45,13 @@ public class PolyPlusRegistry extends PolyRegistry {
     public BlockState INVISIBLE_CACTUS = null;
     public BlockState INVISIBLE_CAMPFIRE = null;
     public BlockState INVISIBLE_WATERLOGGED_CAMPFIRE = null;
+    public BlockState INVISIBILE_THICK_TRIPWIRE = null;
+    public BlockState INVISIBLE_TRIPWIRE_HOOK_NORTH = null;
+    public BlockState INVISIBLE_TRIPWIRE_HOOK_EAST = null;
+    public BlockState INVISIBLE_TRIPWIRE_HOOK_SOUTH = null;
+    public BlockState INVISIBLE_TRIPWIRE_HOOK_WEST = null;
     public BlockState INVISIBLE_TURTLE_EGG = null;
+    public BlockState INVISIBLE_DOUBLE_TURTLE_EGG = null;
     public BlockState INVISIBLE_POTTED_PLANT = null;
     private boolean registered = false;
 
@@ -115,6 +121,81 @@ public class PolyPlusRegistry extends PolyRegistry {
     }
 
     /**
+     * Invisible waterlogged campfire states
+     *
+     * @author   Jelle De Loecker   <jelle@elevenways.be>
+     * @since    0.2.0
+     */
+    public BlockState getThickTripwireState() {
+
+        if (this.INVISIBILE_THICK_TRIPWIRE == null) {
+            this.INVISIBILE_THICK_TRIPWIRE = this.requestBlockState(PolyPlusBlockStateProfile.TRIPWIRE_THICK_PROFILE);
+        }
+
+        return this.INVISIBILE_THICK_TRIPWIRE;
+    }
+
+    /**
+     * Invisible northern tripwire hook state
+     *
+     * @author   Jade Godwin    <icanhasabanana@gmail.com>
+     * @since    0.5.2
+     */
+    public BlockState getInvisibleTripwireHookNorthState() {
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_NORTH == null) {
+            this.INVISIBLE_TRIPWIRE_HOOK_NORTH = this.requestBlockState(PolyPlusBlockStateProfile.TRIPWIRE_HOOK_NORTH_PRFILE);
+        }
+
+        return this.INVISIBLE_TRIPWIRE_HOOK_NORTH;
+    }
+
+    /**
+     * Invisible eastern tripwire hook state
+     *
+     * @author   Jade Godwin    <icanhasabanana@gmail.com>
+     * @since    0.5.2
+     */
+    public BlockState getInvisibleTripwireHookEastState() {
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_EAST == null) {
+            this.INVISIBLE_TRIPWIRE_HOOK_EAST = this.requestBlockState(PolyPlusBlockStateProfile.TRIPWIRE_HOOK_EAST_PRFILE);
+        }
+
+        return this.INVISIBLE_TRIPWIRE_HOOK_EAST;
+    }
+
+    /**
+     * Invisible southern tripwire hook state
+     *
+     * @author   Jade Godwin    <icanhasabanana@gmail.com>
+     * @since    0.5.2
+     */
+    public BlockState getInvisibleTripwireHookSouthState() {
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_SOUTH == null) {
+            this.INVISIBLE_TRIPWIRE_HOOK_SOUTH = this.requestBlockState(PolyPlusBlockStateProfile.TRIPWIRE_HOOK_SOUTH_PRFILE);
+        }
+
+        return this.INVISIBLE_TRIPWIRE_HOOK_SOUTH;
+    }
+
+    /**
+     * Invisible western tripwire hook state
+     *
+     * @author   Jade Godwin    <icanhasabanana@gmail.com>
+     * @since    0.5.2
+     */
+    public BlockState getInvisibleTripwireHookWestState() {
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_WEST == null) {
+            this.INVISIBLE_TRIPWIRE_HOOK_WEST = this.requestBlockState(PolyPlusBlockStateProfile.TRIPWIRE_HOOK_WEST_PRFILE);
+        }
+
+        return this.INVISIBLE_TRIPWIRE_HOOK_WEST;
+    }
+
+    /**
      * Invisible cactus states
      *
      * @author   Jelle De Loecker   <jelle@elevenways.be>
@@ -137,10 +218,24 @@ public class PolyPlusRegistry extends PolyRegistry {
     public BlockState getInvisibleTurtleEggState() {
 
         if (this.INVISIBLE_TURTLE_EGG == null) {
-            this.INVISIBLE_TURTLE_EGG = this.requestBlockState(PolyPlusBlockStateProfile.TURTLE_EGG_PROFILE);
+            this.INVISIBLE_TURTLE_EGG = this.requestBlockState(PolyPlusBlockStateProfile.ONE_TURTLE_EGG_PROFILE);
         }
 
         return this.INVISIBLE_TURTLE_EGG;
+    }
+
+    /**
+     * Invisible turtle egg state
+     *
+     * @since    0.5.0
+     */
+    public BlockState getInvisibleDoubleTurtleEggState() {
+
+        if (this.INVISIBLE_DOUBLE_TURTLE_EGG == null) {
+            this.INVISIBLE_DOUBLE_TURTLE_EGG = this.requestBlockState(PolyPlusBlockStateProfile.TWO_TURTLE_EGG_PROFILE);
+        }
+
+        return this.INVISIBLE_DOUBLE_TURTLE_EGG;
     }
 
     /**
@@ -382,8 +477,32 @@ public class PolyPlusRegistry extends PolyRegistry {
             states.add(this.INVISIBLE_TURTLE_EGG);
         }
 
+        if (this.INVISIBLE_DOUBLE_TURTLE_EGG != null) {
+            states.add(this.INVISIBLE_DOUBLE_TURTLE_EGG);
+        }
+
         if (this.INVISIBLE_POTTED_PLANT != null) {
             states.add(this.INVISIBLE_POTTED_PLANT);
+        }
+
+        if (this.INVISIBILE_THICK_TRIPWIRE != null) {
+            states.add(this.INVISIBILE_THICK_TRIPWIRE);
+        }
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_NORTH != null) {
+            states.add(this.INVISIBLE_TRIPWIRE_HOOK_NORTH);
+        }
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_EAST != null) {
+            states.add(this.INVISIBLE_TRIPWIRE_HOOK_EAST);
+        }
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_SOUTH != null) {
+            states.add(this.INVISIBLE_TRIPWIRE_HOOK_SOUTH);
+        }
+
+        if (this.INVISIBLE_TRIPWIRE_HOOK_WEST != null) {
+            states.add(this.INVISIBLE_TRIPWIRE_HOOK_WEST);
         }
 
         for (BlockState client_state : states) {
@@ -409,11 +528,14 @@ public class PolyPlusRegistry extends PolyRegistry {
         double min_y = shape.getMin(Direction.Axis.Y);
         double max_y = shape.getMax(Direction.Axis.Y);
         boolean do_egg = "egg".equals(preferred_collision_type);
+        boolean do_double_egg = "double_egg".equals(preferred_collision_type);
+        boolean do_thick_tripwire = "thick_tripwire".equals(preferred_collision_type);
         boolean do_stairs = "stairs".equals(preferred_collision_type);
         boolean do_bed = "bed".equals(preferred_collision_type);
         boolean do_cactus = "cactus".equals(preferred_collision_type);
         boolean do_campfire = "campfire".equals(preferred_collision_type);
         boolean do_full_transparent = "full_transparent".equals(preferred_collision_type);
+        boolean do_tripwire = "tripwire_hook".equals(preferred_collision_type);
         boolean is_waterlogged = false;
         boolean blocks_light = modded_state.isOpaque();
 
@@ -454,6 +576,8 @@ public class PolyPlusRegistry extends PolyRegistry {
             state = this.getInvisibleFullTransparentBlock();
         } else if (do_egg) {
             state = this.getInvisibleTurtleEggState();
+        } else if (do_double_egg) {
+            state = this.getInvisibleDoubleTurtleEggState();
         } else if (do_campfire) {
             if (is_waterlogged) {
                 state = this.getInvisibleWaterloggedCampfireState();
@@ -464,6 +588,8 @@ public class PolyPlusRegistry extends PolyRegistry {
             }
         } else if (do_cactus) {
             state = this.getInvisibleCactusState();
+        } else if (do_thick_tripwire) {
+            state = this.getThickTripwireState();
         } else if (do_stairs) {
 
             ItemBlockPoly.CombinedPropertyKey key = new ItemBlockPoly.CombinedPropertyKey();
@@ -478,6 +604,16 @@ public class PolyPlusRegistry extends PolyRegistry {
 
             for (var ikey : this.getInvisibleStairStates().keySet()) {
                 var val = this.getInvisibleStairStates().get(ikey);
+            }
+        } else if (do_tripwire) {
+            if (modded_state.contains(Properties.HORIZONTAL_FACING)) {
+                state = switch(modded_state.get(Properties.HORIZONTAL_FACING)) {
+                    case NORTH -> this.getInvisibleTripwireHookNorthState();
+                    case EAST -> this.getInvisibleTripwireHookEastState();
+                    case SOUTH -> this.getInvisibleTripwireHookSouthState();
+                    case WEST -> this.getInvisibleTripwireHookWestState();
+                    default -> null;
+                };
             }
         }
 

@@ -17,31 +17,16 @@ public class TurtleEggFilters {
     public static Block[] TURTLE_EGG_BLOCKS = {Blocks.TURTLE_EGG};
 
     // Claim the `hatch=1` state
-    public static final Predicate<BlockState> TURTLE_EGG_FILTER = (blockState) -> {
+    public static final Predicate<BlockState> TURTLE_EGG_FILTER = (blockState) -> blockState.get(TurtleEggBlock.HATCH) == 1;
 
-        int amount_of_eggs = blockState.get(TurtleEggBlock.EGGS);
+    public static final Predicate<BlockState> ONE_TURTLE_EGG_FILTER = TURTLE_EGG_FILTER.and(blockState -> blockState.get(TurtleEggBlock.EGGS) == 1);
 
-        if (amount_of_eggs != 1) {
-            return false;
-        }
-
-        int age = blockState.get(TurtleEggBlock.HATCH);
-
-        return age == 1;
-    };
+    public static final Predicate<BlockState> TWO_TURTLE_EGG_FILTER = TURTLE_EGG_FILTER.and(blockState -> blockState.get(TurtleEggBlock.EGGS) == 2);
 
     // Make it use the `hatch=2` state instead
     public static final Predicate<BlockState> TURTLE_EGG_REPLACEMENT_FILTER = (blockState) -> {
-
-        int amount_of_eggs = blockState.get(TurtleEggBlock.EGGS);
-
-        if (amount_of_eggs != 1) {
-            return false;
-        }
-
-        int age = blockState.get(TurtleEggBlock.HATCH);
-
-        return age == 2;
+        if (blockState.get(TurtleEggBlock.EGGS) > 2) return false;
+        return blockState.get(TurtleEggBlock.HATCH) == 2;
     };
 
     public static final BiConsumer<Block, PolyRegistry> TURTLE_EGG_ON_FIRST_REGISTER = (block, polyRegistry) -> {

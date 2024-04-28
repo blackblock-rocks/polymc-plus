@@ -60,8 +60,15 @@ public class PolyPlusBlockStateProfile {
     // Soul Campfire states
     public static final BlockStateProfile SOUL_CAMPFIRE_PROFILE = BlockStateProfile.newProfile("soul campfire profiles", SoulCampfireFilters.SOUL_CAMPFIRE_BLOCKS, SoulCampfireFilters.SOUL_CAMPFIRE_FILTER, SoulCampfireFilters.SOUL_CAMPFIRE_ON_FIRST_REGISTER);
 
+    // Tripwire hook states
+    public static final BlockStateProfile TRIPWIRE_HOOK_NORTH_PRFILE = BlockStateProfile.newProfile("tripwire hook north profiles", TripwireHookFilters.TRIPWIRE_HOOK_BLOCKS, TripwireHookFilters.TRIPWIRE_HOOK_NORTH_FILTER, TripwireHookFilters.TRIPWIRE_HOOK_ON_FIRST_REGISTER);
+    public static final BlockStateProfile TRIPWIRE_HOOK_EAST_PRFILE = BlockStateProfile.newProfile("tripwire hook east profiles", TripwireHookFilters.TRIPWIRE_HOOK_BLOCKS, TripwireHookFilters.TRIPWIRE_HOOK_EAST_FILTER, TripwireHookFilters.TRIPWIRE_HOOK_ON_FIRST_REGISTER);
+    public static final BlockStateProfile TRIPWIRE_HOOK_SOUTH_PRFILE = BlockStateProfile.newProfile("tripwire hook south profiles", TripwireHookFilters.TRIPWIRE_HOOK_BLOCKS, TripwireHookFilters.TRIPWIRE_HOOK_SOUTH_FILTER, TripwireHookFilters.TRIPWIRE_HOOK_ON_FIRST_REGISTER);
+    public static final BlockStateProfile TRIPWIRE_HOOK_WEST_PRFILE = BlockStateProfile.newProfile("tripwire hook west profiles", TripwireHookFilters.TRIPWIRE_HOOK_BLOCKS, TripwireHookFilters.TRIPWIRE_HOOK_WEST_FILTER, TripwireHookFilters.TRIPWIRE_HOOK_ON_FIRST_REGISTER);
+
     // Turtle egg states
-    public static final BlockStateProfile TURTLE_EGG_PROFILE = BlockStateProfile.newProfile("turtle egg profiles", TurtleEggFilters.TURTLE_EGG_BLOCKS, TurtleEggFilters.TURTLE_EGG_FILTER, TurtleEggFilters.TURTLE_EGG_ON_FIRST_REGISTER);
+    public static final BlockStateProfile ONE_TURTLE_EGG_PROFILE = BlockStateProfile.newProfile("turtle egg profiles", TurtleEggFilters.TURTLE_EGG_BLOCKS, TurtleEggFilters.ONE_TURTLE_EGG_FILTER, TurtleEggFilters.TURTLE_EGG_ON_FIRST_REGISTER);
+    public static final BlockStateProfile TWO_TURTLE_EGG_PROFILE = BlockStateProfile.newProfile("double turtle egg profiles", TurtleEggFilters.TURTLE_EGG_BLOCKS, TurtleEggFilters.TWO_TURTLE_EGG_FILTER, TurtleEggFilters.TURTLE_EGG_ON_FIRST_REGISTER);
 
     // Potted plant states
     public static final BlockStateProfile POTTED_PLANT_PROFILE = BlockStateProfile.newProfile("potted plant profiles", PottedPlantFilters.POTTED_PLANT_BLOCKS, PottedPlantFilters.POTTED_PLANT_FILTER, PottedPlantFilters.POTTED_PLANT_ON_FIRST_REGISTER);
