@@ -122,6 +122,7 @@ public class PolyPlusMap implements PolyMap {
         if ((player == null || player.isCreative()) && !ItemStack.canCombine(serverItem, ret) && !serverItem.isEmpty()) {
             // Preserves the nbt of the original item so it can be reverted
             ret = ret.copy();
+            originalNbt.remove("Count");
             ret.setSubNbt(ORIGINAL_ITEM_NBT, originalNbt);
         }
 
