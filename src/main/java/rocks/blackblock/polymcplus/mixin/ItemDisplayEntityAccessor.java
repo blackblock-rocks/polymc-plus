@@ -14,4 +14,10 @@ public interface ItemDisplayEntityAccessor {
         throw new AssertionError();
     }
 
+    @Accessor("ITEM_DISPLAY")
+    public static TrackedData<Byte> getITEM_DISPLAY() {
+        throw new AssertionError();
+    }
+
+
 }

@@ -3,6 +3,7 @@ package rocks.blackblock.polymcplus.wizard;
 import io.github.theepicblock.polymc.api.wizard.PacketConsumer;
 import io.github.theepicblock.polymc.impl.poly.wizard.AbstractVirtualEntity;
 import io.github.theepicblock.polymc.impl.poly.wizard.EntityUtil;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -32,6 +33,7 @@ public class VItemDisplay extends AbstractVirtualEntity {
     public static final TrackedData<Quaternionf> LEFT_ROTATION_KEY = DisplayEntityAccessor.getLEFT_ROTATION();
     public static final TrackedData<Quaternionf> RIGHT_ROTATION_KEY = DisplayEntityAccessor.getRIGHT_ROTATION();
     public static final TrackedData<ItemStack> ITEM_KEY = ItemDisplayEntityAccessor.getITEM();
+    public static final TrackedData<Byte> ITEM_DISPLAY_KEY = ItemDisplayEntityAccessor.getITEM_DISPLAY();
     public static final TrackedData<Float> WIDTH_KEY = DisplayEntityAccessor.getWIDTH();
     public static final TrackedData<Float> HEIGHT_KEY = DisplayEntityAccessor.getHEIGHT();
     public static final TrackedData<Float> SHADOW_STRENGTH_KEY = DisplayEntityAccessor.getSHADOW_STRENGTH();
@@ -98,6 +100,15 @@ public class VItemDisplay extends AbstractVirtualEntity {
      */
     public void setViewRange(PacketConsumer view, Float range) {
         this.sendSingleTrackedData(view, VIEW_RANGE_KEY, range);
+    }
+
+    /**
+     * Send a single display mode update
+     *
+     * @since    0.5.2
+     */
+    public void setItemDisplay(PacketConsumer view, ModelTransformationMode transform) {
+        this.sendSingleTrackedData(view, ITEM_DISPLAY_KEY, transform.getIndex());
     }
 
     /**
@@ -235,6 +246,13 @@ public class VItemDisplay extends AbstractVirtualEntity {
         public void setViewRange(Float range) {
             this.set(VIEW_RANGE_KEY, range);
         }
+
+        /**
+         * Send a single display mode update
+         *
+         * @since    0.5.2
+         */
+        public void setItemDisplay(ModelTransformationMode transform) { this.set(ITEM_DISPLAY_KEY, transform.getIndex()); }
 
         /**
          * Get the entries
