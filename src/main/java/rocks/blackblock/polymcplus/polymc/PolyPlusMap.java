@@ -15,6 +15,7 @@ import io.github.theepicblock.polymc.api.item.ItemLocation;
 import io.github.theepicblock.polymc.api.item.ItemPoly;
 import io.github.theepicblock.polymc.api.item.ItemTransformer;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.impl.PolyMapImpl;
 import io.github.theepicblock.polymc.impl.Util;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
@@ -22,6 +23,8 @@ import io.github.theepicblock.polymc.impl.resource.ResourcePackImplementation;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.*;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -41,16 +44,16 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
+import rocks.blackblock.polymcplus.tools.StackHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+
+import static io.github.theepicblock.polymc.impl.PolyMapImpl.ORIGINAL_ITEM_CODEC;
 
 /**
  * The PolyMcPlus map
@@ -107,7 +110,6 @@ public class PolyPlusMap implements PolyMap {
     @Override
     public ItemStack getClientItem(ItemStack serverItem, @Nullable ServerPlayerEntity player, @Nullable ItemLocation location) {
         ItemStack ret = serverItem;
-        NbtCompound originalNbt = serverItem.writeNbt(new NbtCompound());
 
         ItemPoly poly = itemPolys.get(serverItem.getItem());
 
@@ -119,11 +121,12 @@ public class PolyPlusMap implements PolyMap {
             ret = globalPoly.transform(serverItem, ret, player, location);
         }
 
-        if ((player == null || player.isCreative()) && !ItemStack.canCombine(serverItem, ret) && !serverItem.isEmpty()) {
+        if ((player == null || player.isCreative()) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
             // Preserves the nbt of the original item so it can be reverted
-            ret = ret.copy();
-            originalNbt.remove("Count");
-            ret.setSubNbt(ORIGINAL_ITEM_NBT, originalNbt);
+            ItemStack stack_to_return = ret;
+            NbtComponent.DEFAULT.with(ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
+                stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
+            });
         }
 
         return ret;
@@ -191,7 +194,7 @@ public class PolyPlusMap implements PolyMap {
      */
     @Override
     public ItemStack reverseClientItem(ItemStack clientItemStack) {
-        return recoverOriginalItem(clientItemStack);
+        return PolyMapImpl.recoverOriginalItem(clientItemStack);
     }
 
     /**
@@ -202,22 +205,8 @@ public class PolyPlusMap implements PolyMap {
      *
      * @param    clientItemStack   The client-side item stack
      */
-    public static ItemStack recoverOriginalItem(ItemStack clientItemStack) {
+    //public static ItemStack recoverOriginalItem(ItemStack clientItemStack)
 
-        if (clientItemStack.getNbt() == null || !clientItemStack.getNbt().contains(ORIGINAL_ITEM_NBT, NbtType.COMPOUND)) {
-            return clientItemStack;
-        }
-
-        NbtCompound tag = clientItemStack.getNbt().getCompound(ORIGINAL_ITEM_NBT);
-        ItemStack stack = ItemStack.fromNbt(tag);
-        stack.setCount(clientItemStack.getCount()); // The clientside count is leading, to support middle mouse button duplication and stack splitting and such
-
-        if (stack.isEmpty() && !clientItemStack.isEmpty()) {
-            stack = new ItemStack(Items.CLAY_BALL);
-            stack.setCustomName(Text.literal("Invalid Item").formatted(Formatting.ITALIC));
-        }
-        return stack;
-    }
 
     @Override
     public boolean isVanillaLikeMap() {

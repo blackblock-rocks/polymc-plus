@@ -2,6 +2,7 @@ package rocks.blackblock.polymcplus.tools;
 
 import net.minecraft.block.*;
 import net.minecraft.sound.BlockSoundGroup;
+import rocks.blackblock.polymcplus.mixin.AbstractBlockAccessor;
 
 /**
  * Class to get the original Material of a block
@@ -20,7 +21,9 @@ public class MaterialLookup {
             return Type.GLASS;
         }
 
-        Type result = getMaterial(block.getSoundGroup(state));
+        BlockSoundGroup sound_group = ((AbstractBlockAccessor) block).getSoundGroup();
+
+        Type result = getMaterial(sound_group);
 
         // Make sure it's glass
         if (result == Type.GLASS) {
@@ -110,7 +113,8 @@ public class MaterialLookup {
         Type result = getMaterial(block.getBlockSetType());
 
         if (result == null) {
-            result = getMaterial(block.getSoundGroup(block.getDefaultState()));
+            BlockSoundGroup sound_group = ((AbstractBlockAccessor) block).getSoundGroup();
+            result = getMaterial(sound_group);
         }
 
         return result;

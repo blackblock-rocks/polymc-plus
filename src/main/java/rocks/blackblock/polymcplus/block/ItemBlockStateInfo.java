@@ -3,8 +3,8 @@ package rocks.blackblock.polymcplus.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.shape.VoxelShape;
+import rocks.blackblock.polymcplus.tools.StackHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,11 +182,11 @@ public class ItemBlockStateInfo {
         List<ItemStack> stacks = this.getClientStacks();
 
         for (ItemStack stack : stacks) {
-            if (stack_info.length() > 0) {
+            if (!stack_info.isEmpty()) {
                 stack_info.append(", ");
             }
 
-            stack_info.append(stack).append("[").append(stack.getNbt()).append("]");
+            stack_info.append(stack).append("[").append(StackHelper.getCustomDataString(stack)).append("]");
         }
 
         return "ItemBlockStateInfo{modded_state=" + this.modded_state + ",client_items=" + stack_info + ",client_collision_state=" + this.client_collision_state + "}";
@@ -306,15 +306,8 @@ public class ItemBlockStateInfo {
          * @since    0.5.1
          */
         public ItemStack generateClientStack() {
-
-            var stack = new ItemStack(this.item_cmd.client_item);
-            NbtCompound tag = stack.getOrCreateNbt();
-            tag.putInt("CustomModelData", this.item_cmd.cmd_value);
-            stack.setNbt(tag);
-
-            this.cached_client_stack = stack;
-
-            return stack;
+            this.cached_client_stack = StackHelper.createCustomModelDataStack(this.item_cmd.client_item, this.item_cmd.cmd_value);
+            return this.cached_client_stack;
         }
 
         /**
