@@ -4,13 +4,10 @@ import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
-import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
-import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +16,7 @@ import rocks.blackblock.polymcplus.polymc.PolyPlusMap;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.server.PolyPlusCommands;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * The main class of the mod
@@ -44,24 +32,6 @@ public class PolyMcPlus implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("polymc-plus");
 	private static PolyPlusRegistry mainPolyPlusRegistry = null;
 	private static PolyPlusMap mainPolyPlusMap = null;
-	private static MinecraftDedicatedServer server = null;
-
-	/**
-	 * Set the server instance.
-	 * This is automatically called by the `ServerMixin` class upon server start.
-	 *
-	 * @param server
-	 */
-	public static void setServer(MinecraftDedicatedServer server) {
-		PolyMcPlus.server = server;
-	}
-
-	/**
-	 * Get the server instance, which is available after the server has started.
-	 */
-	public static MinecraftDedicatedServer getServer() {
-		return server;
-	}
 
 	/**
 	 * Get a ModdedResources container.
@@ -70,6 +40,7 @@ public class PolyMcPlus implements ModInitializer {
 	 * @since    0.5.1
 	 */
 	public static ModdedResources getModdedResources() {
+
 		if (modded_resources == null) {
 			modded_resources = new ModdedResourceContainerImpl();
 		}
@@ -99,18 +70,6 @@ public class PolyMcPlus implements ModInitializer {
 	}
 
 	/**
-	 * Get the current tick count
-	 */
-	public static int getTick() {
-
-		if (server == null) {
-			return -1;
-		}
-
-		return server.getTicks();
-	}
-
-	/**
 	 * Initialize PolyMcPlus
 	 *
 	 * @author   Jelle De Loecker   <jelle@elevenways.be>
@@ -135,6 +94,10 @@ public class PolyMcPlus implements ModInitializer {
 				}
 				modded_resources = null;
 			}
+
+			// Used to do this at the head of the `createWorlds` call,
+			// is it still in-time here?
+			PolyMcPlus.generatePolyMap();
 		});
 	}
 
@@ -216,6 +179,7 @@ public class PolyMcPlus implements ModInitializer {
 	 * @author   Jelle De Loecker   <jelle@elevenways.be>
 	 * @since    0.4.0
 	 */
+	@SuppressWarnings("unused")
 	public static void copyAssetDirectoryIntoResourcePack(String namespace, String path, Class clazz, PolyMcResourcePack target_pack, SimpleLogger logger) {
 
 		String full_path = "assets/" + namespace + "/" + path + "/";
@@ -272,7 +236,5 @@ public class PolyMcPlus implements ModInitializer {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }

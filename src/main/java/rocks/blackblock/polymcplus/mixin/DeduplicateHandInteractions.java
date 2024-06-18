@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import rocks.blackblock.bib.collection.WeakTickCache;
 import rocks.blackblock.polymcplus.polymc.DeduplicateInteractionInfo;
-import rocks.blackblock.polymcplus.tools.WeakTickCache;
 
 /**
  * Client-side interactions with blocks that normally *DON'T* have client-side interactions

@@ -8,9 +8,7 @@
     "DeduplicateHandInteractions",
     "DisplayEntityAccessor",
     "ItemDisplayEntityAccessor",
-    "MinecraftDedicatedServerMixin",
     "ServerPlayerEntityMixin",
-    "ServerStartMixin",
     "TextDisplayEntityAccessor"
   ],
   "client": [

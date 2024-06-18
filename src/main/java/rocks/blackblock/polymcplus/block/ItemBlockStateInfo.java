@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.shape.VoxelShape;
-import rocks.blackblock.polymcplus.tools.StackHelper;
+import rocks.blackblock.bib.util.BibItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,7 +186,7 @@ public class ItemBlockStateInfo {
                 stack_info.append(", ");
             }
 
-            stack_info.append(stack).append("[").append(StackHelper.getCustomDataString(stack)).append("]");
+            stack_info.append(BibItem.toDebugString(stack));
         }
 
         return "ItemBlockStateInfo{modded_state=" + this.modded_state + ",client_items=" + stack_info + ",client_collision_state=" + this.client_collision_state + "}";
@@ -306,7 +306,7 @@ public class ItemBlockStateInfo {
          * @since    0.5.1
          */
         public ItemStack generateClientStack() {
-            this.cached_client_stack = StackHelper.createCustomModelDataStack(this.item_cmd.client_item, this.item_cmd.cmd_value);
+            this.cached_client_stack = BibItem.createStackWithCustomModelData(this.item_cmd.client_item, this.item_cmd.cmd_value);
             return this.cached_client_stack;
         }
 
