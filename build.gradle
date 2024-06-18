@@ -10,6 +10,27 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+def localPropertiesFile = file('local.properties')
+def localProperties = new Properties()
+
+if (localPropertiesFile.exists()) {
+	localPropertiesFile.withInputStream { stream ->
+		localProperties.load(stream)
+	}
+}
+
+def isDevelopment = localProperties.getProperty("environment", "dev") == "dev"
+def localRepoDir = null
+
+if (localProperties.hasProperty("localRepoDir")) {
+	localRepoDir = localProperties.getProperty("localRepoDir")
+} else if (project.hasProperty("localRepoDir")) {
+	localRepoDir = project.findProperty("localRepoDir")
+}
+
+println("Info: isDevelopment = $isDevelopment")
+println("Info: localRepoDir = $localRepoDir")
+
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
@@ -23,6 +44,55 @@ repositories {
 
 	flatDir {
 		dirs '../polyvalent/build/libs/'
+	}
+
+	maven {
+		url 'https://jitpack.io'
+	}
+
+	// PolyMC
+	maven {
+		url "https://maven.theepicblock.nl"
+		content {
+			includeGroup("nl.theepicblock")
+		}
+	}
+
+	// Blackblock
+	maven {
+		url 'https://maven.blackblock.rocks/releases'
+	}
+
+	// Modrinth offers a maven repository
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = "https://api.modrinth.com/maven"
+			}
+		}
+		filter {
+			includeGroup "maven.modrinth"
+		}
+	}
+
+	// Curseforge also offers a maven repository,
+	// though dependencies have to use file id's
+	exclusiveContent {
+		forRepository {
+			maven {
+				url "https://cursemaven.com"
+			}
+		}
+		filter {
+			includeGroup "curse.maven"
+		}
+	}
+
+	if (isDevelopment && localRepoDir) {
+		maven {
+			url localRepoDir
+		}
 	}
 }
 
@@ -41,7 +111,10 @@ dependencies {
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 
 	modImplementation "com.github.TheEpicBlock:PolyMc:${project.polymc_version}"
-	modImplementation ("rocks.blackblock:polyvalent:${project.polyvalent_version}")
+	modImplementation "rocks.blackblock:polyvalent:${project.polyvalent_version}"
+
+	// The Blackblock Bib Library
+	modImplementation "rocks.blackblock:blackblock-bib:${project.blackblock_bib_version}"
 }
 
 processResources {
@@ -75,8 +148,7 @@ def env = System.getenv()
 // configure the maven publication
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
+		create("mavenJava", MavenPublication) {
 			artifact(remapJar) {
 				builtBy remapJar
 			}
@@ -103,6 +175,18 @@ publishing {
 				}
 			} else {
 				mavenLocal()
+			}
+
+			if (isDevelopment) {
+
+				if (localRepoDir) {
+					maven {
+						name = 'local'
+						url = uri(localRepoDir)
+					}
+				} else {
+					mavenLocal()
+				}
 			}
 		}
 	}
