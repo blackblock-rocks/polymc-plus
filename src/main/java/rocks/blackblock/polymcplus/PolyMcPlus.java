@@ -5,6 +5,8 @@ import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
+import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,7 +18,13 @@ import rocks.blackblock.polymcplus.polymc.PolyPlusMap;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
 import rocks.blackblock.polymcplus.server.PolyPlusCommands;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * The main class of the mod
