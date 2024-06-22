@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import io.github.theepicblock.polymc.PolyMc;
 import io.github.theepicblock.polymc.api.DebugInfoProvider;
 import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
@@ -116,7 +115,7 @@ public class PolyPlusMap implements PolyMap {
         }
 
         for (ItemTransformer globalPoly : globalItemPolys) {
-            ret = globalPoly.transform(serverItem, ret, player, location);
+            ret = globalPoly.transform(serverItem, ret, this, player, location);
         }
 
         if ((player == null || player.isCreative()) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
