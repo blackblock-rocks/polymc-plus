@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import io.github.theepicblock.polymc.PolyMc;
 import io.github.theepicblock.polymc.api.DebugInfoProvider;
 import io.github.theepicblock.polymc.api.PolyMap;
 import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
@@ -27,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.resource.InputSupplier;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -100,6 +102,11 @@ public class PolyPlusMap implements PolyMap {
      */
     @Override
     public ItemStack getClientItem(ItemStack serverItem, @Nullable ServerPlayerEntity player, @Nullable ItemLocation location) {
+
+        if (serverItem == ItemStack.EMPTY || serverItem.getItem() == Items.AIR) {
+            return serverItem;
+        }
+
         ItemStack ret = serverItem;
 
         ItemPoly poly = itemPolys.get(serverItem.getItem());
