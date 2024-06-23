@@ -28,6 +28,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.resource.InputSupplier;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -119,9 +122,12 @@ public class PolyPlusMap implements PolyMap {
         }
 
         if ((player == null || player.isCreative()) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
+
+            RegistryOps<NbtElement> registryOps = player.getRegistryManager().getOps(NbtOps.INSTANCE);
+
             // Preserves the nbt of the original item so it can be reverted
             ItemStack stack_to_return = ret;
-            NbtComponent.DEFAULT.with(ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
+            NbtComponent.DEFAULT.with(registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
                 stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
             });
         }
