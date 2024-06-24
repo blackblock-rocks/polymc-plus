@@ -6,6 +6,7 @@ import io.github.theepicblock.polymc.impl.poly.item.InvalidComponentFixGlobalPol
 import io.github.theepicblock.polymc.impl.poly.item.Tooltip2LoreTransformer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import rocks.blackblock.polymcplus.item.CustomPotionTransformer;
 
 import java.util.Comparator;
 import java.util.function.BiConsumer;
@@ -37,6 +38,7 @@ public class PolyPlusGenerator {
      */
     public static void addDefaultGlobalItemPolys(PolyRegistry registry) {
         registry.registerGlobalItemPoly(new Tooltip2LoreTransformer());
+        registry.registerGlobalItemPoly(new CustomPotionTransformer());
         registry.registerGlobalItemPoly(new InvalidComponentFixGlobalPoly());
     }
 
