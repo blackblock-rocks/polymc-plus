@@ -38,6 +38,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
+import rocks.blackblock.bib.BibMod;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
 
@@ -123,7 +124,7 @@ public class PolyPlusMap implements PolyMap {
 
         if ((player == null || player.isCreative()) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
 
-            RegistryOps<NbtElement> registryOps = player.getRegistryManager().getOps(NbtOps.INSTANCE);
+            RegistryOps<NbtElement> registryOps = BibMod.getDynamicRegistry(player).getOps(NbtOps.INSTANCE);
 
             // Preserves the nbt of the original item so it can be reverted
             ItemStack stack_to_return = ret;
