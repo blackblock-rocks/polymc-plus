@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 	id 'org.checkerframework' version '0.6.40'
 }
@@ -42,6 +42,7 @@ def constructVersion(baseVersion) {
 	return result
 }
 
+archivesBaseName = project.archives_base_name
 version = constructVersion(baseVersion)
 group = baseGroup
 
