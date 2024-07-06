@@ -197,8 +197,8 @@ public class PolyPlusMap implements PolyMap {
      * @param    clientItemStack   The client-side item stack
      */
     @Override
-    public ItemStack reverseClientItem(ItemStack clientItemStack) {
-        return PolyMapImpl.recoverOriginalItem(clientItemStack);
+    public ItemStack reverseClientItem(ItemStack clientItemStack, @Nullable ServerPlayerEntity player) {
+        return PolyMapImpl.recoverOriginalItem(clientItemStack, player);
     }
 
     /**
