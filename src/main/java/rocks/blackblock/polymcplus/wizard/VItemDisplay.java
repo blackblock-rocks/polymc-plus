@@ -2,11 +2,11 @@ package rocks.blackblock.polymcplus.wizard;
 
 import io.github.theepicblock.polymc.api.wizard.PacketConsumer;
 import io.github.theepicblock.polymc.impl.poly.wizard.EntityUtil;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 import rocks.blackblock.polymcplus.mixin.ItemDisplayEntityAccessor;

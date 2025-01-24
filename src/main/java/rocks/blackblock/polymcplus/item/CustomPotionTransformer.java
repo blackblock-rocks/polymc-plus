@@ -39,12 +39,12 @@ public class CustomPotionTransformer implements ItemTransformer {
                 String potion_lang_pointer = CUSTOM_POTION_LANG_POINTERS.get(potion_id);
 
                 // Set the new potion contents.
-                if (color != null) output.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.of(color), potion.value().getEffects()));
-                else output.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), potion.value().getEffects()));
+                if (color != null) output.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.of(color), potion.value().getEffects(), Optional.empty()));
+                else output.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), potion.value().getEffects(), Optional.empty()));
 
                 // Set the potion name as well.
                 if (potion_lang_pointer != null && !potion_lang_pointer.isEmpty()) {
-                    String output_translation_key = output.getTranslationKey();
+                    String output_translation_key = output.getItem().getTranslationKey();
                     if (output_translation_key.endsWith(".effect.empty")) output_translation_key = output_translation_key.substring(0, output_translation_key.length() - 13);
                     output.set(DataComponentTypes.CUSTOM_NAME, Text.translatable( output_translation_key + ".effect." + potion_lang_pointer).setStyle(Style.EMPTY.withItalic(false)));
                 }

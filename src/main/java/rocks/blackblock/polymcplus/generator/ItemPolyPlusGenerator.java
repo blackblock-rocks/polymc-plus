@@ -1,10 +1,9 @@
 package rocks.blackblock.polymcplus.generator;
 
 import io.github.theepicblock.polymc.api.PolyRegistry;
-import io.github.theepicblock.polymc.api.item.CustomModelDataManager;
 import io.github.theepicblock.polymc.api.item.ItemPoly;
 import io.github.theepicblock.polymc.impl.generator.ItemPolyGenerator;
-import io.github.theepicblock.polymc.impl.poly.item.CustomModelDataPoly;
+import io.github.theepicblock.polymc.impl.poly.item.SimpleItemPoly;
 import net.minecraft.item.*;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 
@@ -20,14 +19,13 @@ public class ItemPolyPlusGenerator {
      * Generates the most suitable {@link ItemPoly} for a given {@link Item}
      */
     public static ItemPoly generatePoly(Item item, PolyRegistry builder) {
-        CustomModelDataManager cmdManager = builder.getSharedValues(CustomModelDataManager.KEY);
 
         if (item instanceof PotionItem){
-            return new CustomModelDataPoly(cmdManager, item, Items.MILK_BUCKET);
+            return new SimpleItemPoly(Items.MILK_BUCKET);
         } else if (item instanceof WrittenBookItem) {
-            return new CustomModelDataPoly(cmdManager, item, Items.WRITTEN_BOOK);
+            return new SimpleItemPoly(Items.WRITTEN_BOOK);
         } else if (item instanceof WritableBookItem) {
-            return new CustomModelDataPoly(cmdManager, item, Items.WRITABLE_BOOK);
+            return new SimpleItemPoly(Items.WRITABLE_BOOK);
         }
 
         // Fall back to the basic PolyMc implementation
