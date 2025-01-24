@@ -39,6 +39,7 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import rocks.blackblock.bib.BibMod;
+import rocks.blackblock.bib.util.BibServer;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
 
@@ -122,14 +123,21 @@ public class PolyPlusMap implements PolyMap {
             ret = globalPoly.transform(serverItem, ret, this, player, location);
         }
 
-        if ((player == null || player.isCreative()) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
+        if (ret.getMaxCount() != serverItem.getMaxCount()) {
+            ret.set(DataComponentTypes.MAX_STACK_SIZE, serverItem.getMaxCount());
+        }
+
+        if ((player == null || player.isCreative() || location == ItemLocation.CREATIVE) && !ItemStack.areItemsAndComponentsEqual(serverItem, ret) && !serverItem.isEmpty()) {
 
             RegistryOps<NbtElement> registryOps = BibMod.getDynamicRegistry(player).getOps(NbtOps.INSTANCE);
 
             // Preserves the nbt of the original item so it can be reverted
             ItemStack stack_to_return = ret;
-            NbtComponent.DEFAULT.with(registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
-                stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
+
+            BibServer.executeWithoutNetworkingLogic(() -> {
+                NbtComponent.DEFAULT.with(registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
+                    stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
+                });
             });
         }
 
