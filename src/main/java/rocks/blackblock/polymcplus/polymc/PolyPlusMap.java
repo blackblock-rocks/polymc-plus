@@ -15,10 +15,12 @@ import io.github.theepicblock.polymc.api.item.ItemLocation;
 import io.github.theepicblock.polymc.api.item.ItemPoly;
 import io.github.theepicblock.polymc.api.item.ItemTransformer;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.api.resource.SimpleAsset;
 import io.github.theepicblock.polymc.impl.PolyMapImpl;
 import io.github.theepicblock.polymc.impl.Util;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.ResourcePackImplementation;
+import io.github.theepicblock.polymc.impl.resource.json.JModelImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.*;
 import net.minecraft.component.DataComponentTypes;
@@ -278,6 +280,28 @@ public class PolyPlusMap implements PolyMap {
         List<PolyMcEntrypoint> entrypoints = FabricLoader.getInstance().getEntrypoints("polymc", PolyMcEntrypoint.class);
         for (PolyMcEntrypoint entrypointEntry : entrypoints) {
             entrypointEntry.registerModSpecificResources(moddedResources, pack, logger);
+        }
+
+        for (var prefix : new String[]{"items/", "equipment/", "textures/"}) {
+            for (var itemFile : moddedResources.locateFiles(prefix)) {
+                pack.setAsset(itemFile.getLeft().getNamespace(), itemFile.getLeft().getPath(), new SimpleAsset(itemFile.getRight()));
+            }
+        }
+
+        for (var itemFile : moddedResources.locateFiles("models/")) {
+            try {
+                pack.setAsset(itemFile.getLeft().getNamespace(), itemFile.getLeft().getPath(), JModelImpl.of(itemFile.getRight().get(), itemFile.getLeft().toString()));
+            } catch (IOException e) {
+                logger.error(e);
+            }
+        }
+
+        for (var itemFile : moddedResources.locateFiles("equipment/")) {
+            try {
+                pack.setAsset(itemFile.getLeft().getNamespace(), itemFile.getLeft().getPath(), JModelImpl.of(itemFile.getRight().get(), itemFile.getLeft().toString()));
+            } catch (IOException e) {
+                logger.error(e);
+            }
         }
 
         // Hooks for all itempolys
