@@ -1,10 +1,12 @@
 package rocks.blackblock.polymcplus.block;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.shape.VoxelShape;
 import rocks.blackblock.bib.util.BibItem;
+import rocks.blackblock.bib.util.BibLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +47,6 @@ public class ItemBlockStateInfo {
         this.modded_state = modded_state;
         this.poly = poly;
         this.generateClientCollisionState();
-    }
-
-    /**
-     * Set the item & CMD value to use
-     *
-     * @author   Jelle De Loecker   <jelle@elevenways.be>
-     * @since    0.2.0
-     */
-    public void addClientItem(Item client_item, int cmd_value) {
-        this.addClientItem(new ItemCMD(client_item, cmd_value));
     }
 
     /**
@@ -197,7 +189,7 @@ public class ItemBlockStateInfo {
      *
      * @since    0.5.1
      */
-    public static class RotatedItemCMD {
+    public static class RotatedItemCMD implements BibLog.Argable {
 
         protected ItemCMD item_cmd;
 
@@ -306,7 +298,22 @@ public class ItemBlockStateInfo {
          * @since    0.5.1
          */
         public ItemStack generateClientStack() {
-            this.cached_client_stack = BibItem.createStackWithCustomModelData(this.item_cmd.client_item, this.item_cmd.cmd_value);
+
+            // We actually don't need CMDs anymore, but we'll clean this up another time
+            //this.cached_client_stack = BibItem.createStackWithCustomModelData(this.item_cmd.client_item, this.item_cmd.cmd_value);
+
+            this.cached_client_stack = new ItemStack(this.item_cmd.client_item);
+
+            // Remove all the existing components (like name, lore, glint, ...)
+            // we don't need them
+            var components = this.cached_client_stack.getComponents();
+            List<ComponentType<?>> to_remove = new ArrayList<>(components.getTypes());
+            for (ComponentType<?> component : to_remove) {
+                this.cached_client_stack.remove(component);
+            }
+
+            this.cached_client_stack.set(DataComponentTypes.ITEM_MODEL, this.item_cmd.getItemModelIdentifier());
+
             return this.cached_client_stack;
         }
 
@@ -331,6 +338,34 @@ public class ItemBlockStateInfo {
             result.setX(this.x);
             result.setY(this.y);
             return result;
+        }
+
+        /**
+         * BibLog.Arg representation of this instance
+         *
+         * @since    0.7.0
+         */
+        @Override
+        public BibLog.Arg toBBLogArg() {
+            var result = BibLog.createArg(this);
+
+            result.add("item_cmd", this.item_cmd);
+            result.add("x", this.x);
+            result.add("y", this.y);
+            result.add("yaw", this.yaw);
+            result.add("pitch", this.pitch);
+
+            return result;
+        }
+
+        /**
+         * String representation of this instance
+         *
+         * @since    0.7.0
+         */
+        @Override
+        public String toString() {
+            return this.toBBLogArg().toString();
         }
     }
 }

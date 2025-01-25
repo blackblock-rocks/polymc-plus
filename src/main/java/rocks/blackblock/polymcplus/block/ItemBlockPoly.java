@@ -1,5 +1,6 @@
 package rocks.blackblock.polymcplus.block;
 
+import com.google.gson.JsonObject;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
@@ -13,18 +14,19 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.shape.VoxelShape;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
+import rocks.blackblock.polymcplus.resource.JsonAsset;
 import rocks.blackblock.polymcplus.wizard.ItemBlockWizard;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This BlockPoly uses items in item frames to display blocks
@@ -116,6 +118,8 @@ public class ItemBlockPoly implements BlockPoly {
         for (BlockState modded_state : modded_states) {
 
             ItemBlockStateInfo info = new ItemBlockStateInfo(modded_state, this);
+            Block modded_block = modded_state.getBlock();
+            var block_id = Registries.BLOCK.getId(modded_block);
 
             // @TODO: If we actually get multiple "variants" (not "multiparts"),
             // only 1 of those variants should be rendered (at random)
@@ -144,7 +148,7 @@ public class ItemBlockPoly implements BlockPoly {
                     Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
                     Item client_item = pair.getLeft();
                     Integer cmd_value = pair.getRight();
-                    item_cmd = new ItemCMD(client_item, cmd_value);
+                    item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
                     this.model_to_cmd.put(model, item_cmd);
                 }
 
@@ -167,7 +171,7 @@ public class ItemBlockPoly implements BlockPoly {
                     Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
                     Item client_item = pair.getLeft();
                     Integer cmd_value = pair.getRight();
-                    item_cmd = new ItemCMD(client_item, cmd_value);
+                    item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
                     this.model_to_cmd.put(model, item_cmd);
                 }
 
@@ -304,6 +308,16 @@ public class ItemBlockPoly implements BlockPoly {
 
             // Add an override into the vanilla item's model that references the modded one
             client_item_model.getOverrides().add(JModelOverride.ofCMD(item_cmd.cmd_value, polyplus_item_location));
+
+            JsonObject root = new JsonObject();
+            JsonObject model = new JsonObject();
+            model.addProperty("type", "minecraft:model");
+            model.addProperty("model", polyplus_item_location);
+            root.add("model", model);
+
+            JsonAsset jsonAsset = new JsonAsset(root);
+            pack.setAsset("polymcplus", "items/" + item_cmd.getItemsAssetFileName(), jsonAsset);
+
         }
     }
 
