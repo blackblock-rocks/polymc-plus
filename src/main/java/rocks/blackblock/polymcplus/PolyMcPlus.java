@@ -5,11 +5,11 @@ import io.github.theepicblock.polymc.api.PolyMcEntrypoint;
 import io.github.theepicblock.polymc.api.misc.PolyMapProvider;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
+import io.github.theepicblock.polymc.impl.misc.WatchListener;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
-import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
-import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
@@ -109,6 +109,10 @@ public class PolyMcPlus implements ModInitializer {
 			// is it still in-time here?
 			PolyMcPlus.generatePolyMap();
 		});
+
+		// Blackblock-perf & VMP rewrite a lot of chunk handlers,
+		// causing PolyMC to never see the chunk unload event
+		ServerChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> ((WatchListener)chunk).polymc$removeAllPlayers());
 	}
 
 	/**
