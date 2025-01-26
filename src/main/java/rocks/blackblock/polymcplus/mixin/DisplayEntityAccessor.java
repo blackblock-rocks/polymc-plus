@@ -14,8 +14,33 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(DisplayEntity.class)
 public interface DisplayEntityAccessor {
 
+    @Accessor("START_INTERPOLATION")
+    static TrackedData<Integer> getSTART_INTERPOLATION() {
+        throw new AssertionError();
+    }
+
+    @Accessor("INTERPOLATION_DURATION")
+    static TrackedData<Integer> getINTERPOLATION_DURATION() {
+        throw new AssertionError();
+    }
+
+    @Accessor("TELEPORT_DURATION")
+    static TrackedData<Integer> getTELEPORT_DURATION() {
+        throw new AssertionError();
+    }
+
+    @Accessor("TRANSLATION")
+    static TrackedData<Vector3f> getTRANSLATION() {
+        throw new AssertionError();
+    }
+
+    @Accessor("BILLBOARD")
+    static TrackedData<AffineTransformation> getBILLBOARD() {
+        throw new AssertionError();
+    }
+
     @Accessor("SCALE")
-    public static TrackedData<Vector3f> getSCALE() {
+    static TrackedData<Vector3f> getSCALE() {
         throw new AssertionError();
     }
 
@@ -49,6 +74,11 @@ public interface DisplayEntityAccessor {
         throw new AssertionError();
     }
 
+    @Accessor("SHADOW_RADIUS")
+    static TrackedData<Float> getSHADOW_RADIUS() {
+        throw new AssertionError();
+    }
+
     @Accessor("SHADOW_STRENGTH")
     static TrackedData<Float> getSHADOW_STRENGTH() {
         throw new AssertionError();
@@ -58,6 +88,30 @@ public interface DisplayEntityAccessor {
     static TrackedData<Integer> getGLOW_COLOR_OVERRIDE() {
         throw new AssertionError();
     }
+
+    @Invoker("setInterpolationDuration")
+    void setInterpolationDuration(int duration);
+
+    @Invoker("setStartInterpolation")
+    void setStartInterpolation(int duration);
+
+    @Invoker("setTeleportDuration")
+    void setTeleportDuration(int duration);
+
+    @Invoker("setBillboardMode")
+    void setBillboardMode(DisplayEntity.BillboardMode billboardMode);
+
+    @Invoker("setViewRange")
+    void setViewRange(float viewRange);
+
+    @Invoker("setShadowRadius")
+    void setShadowRadius(float shadowRadius);
+
+    @Invoker("setShadowStrength")
+    void setShadowStrength(float shadowStrength);
+
+    @Invoker("setGlowColorOverride")
+    void setGlowColorOverride(int glowColorOverride);
 
     @Invoker("setDisplayWidth")
     void setWidth(float width);
