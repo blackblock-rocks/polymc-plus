@@ -7,11 +7,14 @@ import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
 import io.github.theepicblock.polymc.impl.misc.WatchListener;
 import io.github.theepicblock.polymc.impl.misc.logging.SimpleLogger;
+import io.github.theepicblock.polymc.impl.poly.wizard.PacketCountManager;
 import io.github.theepicblock.polymc.impl.resource.ModdedResourceContainerImpl;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +116,18 @@ public class PolyMcPlus implements ModInitializer {
 		// Blackblock-perf & VMP rewrite a lot of chunk handlers,
 		// causing PolyMC to never see the chunk unload event
 		ServerChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> ((WatchListener)chunk).polymc$removeAllPlayers());
+
+		// PolyMC starts at a high wizard-restriction level,
+		// causing the packets to not be sent the first minute.
+		// This works around that by overriding the starting restriction level to 0
+		ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
+			if (entity instanceof ServerPlayerEntity player) {
+				var manager = PacketCountManager.INSTANCE.getTrackerInfoForPlayer(player);
+				if (manager != null) {
+					manager.setRestrictionLevel((byte) 0);
+				}
+			}
+		});
 	}
 
 	/**
