@@ -296,14 +296,6 @@ public class PolyPlusMap implements PolyMap {
             }
         }
 
-        for (var itemFile : moddedResources.locateFiles("equipment/")) {
-            try {
-                pack.setAsset(itemFile.getLeft().getNamespace(), itemFile.getLeft().getPath(), JModelImpl.of(itemFile.getRight().get(), itemFile.getLeft().toString()));
-            } catch (IOException e) {
-                logger.error(e);
-            }
-        }
-
         // Hooks for all itempolys
         this.itemPolys.forEach((item, itemPoly) -> {
             try {
