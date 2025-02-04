@@ -48,6 +48,7 @@ public class ItemBlockPoly implements BlockPoly {
 
     protected final BlockState barrier_state = Blocks.BARRIER.getDefaultState();
     protected final String preferred_collision_type;
+    protected int id_counter = 0;
 
     /**
      * Initialize the ItemBlockPoly for all the states of the given block
@@ -147,7 +148,7 @@ public class ItemBlockPoly implements BlockPoly {
                 } else {
                     Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
                     Item client_item = pair.getLeft();
-                    Integer cmd_value = pair.getRight();
+                    Integer cmd_value = this.id_counter++;
                     item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
                     this.model_to_cmd.put(model, item_cmd);
                 }
@@ -170,7 +171,7 @@ public class ItemBlockPoly implements BlockPoly {
                 } else {
                     Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
                     Item client_item = pair.getLeft();
-                    Integer cmd_value = pair.getRight();
+                    Integer cmd_value = this.id_counter++;
                     item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
                     this.model_to_cmd.put(model, item_cmd);
                 }
