@@ -409,7 +409,7 @@ public class PolyPlusMap implements PolyMap {
                 b.append(info);
             }
         } catch (Exception e) {
-            PolyMcPlus.LOGGER.info(String.format("Error whilst getting debug info from '%s' which is registered to '%s'", poly.getClass().getName(), key));
+            PolyMcPlus.SIMPLE_LOGGER.info(String.format("Error whilst getting debug info from '%s' which is registered to '%s'", poly.getClass().getName(), key));
             e.printStackTrace();
         }
         b.append("\n");

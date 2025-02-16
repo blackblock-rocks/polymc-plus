@@ -40,9 +40,9 @@ public class ItemPolyPlusGenerator {
         try {
             builder.registerItemPoly(item, generatePoly(item, builder));
         } catch (Exception e) {
-            PolyMcPlus.LOGGER.error("Failed to generate a poly for item " + item.getTranslationKey());
+            PolyMcPlus.SIMPLE_LOGGER.error("Failed to generate a poly for item " + item.getTranslationKey());
             e.printStackTrace();
-            PolyMcPlus.LOGGER.error("Attempting to recover by using a default poly. Please report this");
+            PolyMcPlus.SIMPLE_LOGGER.error("Attempting to recover by using a default poly. Please report this");
             builder.registerItemPoly(item, (input, player, location) -> new ItemStack(Items.BARRIER));
         }
     }

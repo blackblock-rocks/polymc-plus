@@ -18,6 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rocks.blackblock.bib.util.BibLog;
 import rocks.blackblock.polymcplus.generator.PolyPlusGenerator;
 import rocks.blackblock.polymcplus.polymc.PolyPlusMap;
 import rocks.blackblock.polymcplus.polymc.PolyPlusRegistry;
@@ -41,8 +42,9 @@ public class PolyMcPlus implements ModInitializer {
 
 	// A reusable ModdedResources container
 	private static ModdedResources modded_resources = null;
+	public static final BibLog.Categorised LOGGER = BibLog.getCategorised("polymcplus");
 
-	public static final Logger LOGGER = LoggerFactory.getLogger("polymc-plus");
+	public static final Logger SIMPLE_LOGGER = LoggerFactory.getLogger("polymc-plus");
 	private static PolyPlusRegistry mainPolyPlusRegistry = null;
 	private static PolyPlusMap mainPolyPlusMap = null;
 
@@ -76,7 +78,7 @@ public class PolyMcPlus implements ModInitializer {
 		try {
 			modded_resources.close();
 		} catch (Exception e) {
-			LOGGER.error("Failed to close modded resources", e);
+			SIMPLE_LOGGER.error("Failed to close modded resources", e);
 		} finally {
 			modded_resources = null;
 		}

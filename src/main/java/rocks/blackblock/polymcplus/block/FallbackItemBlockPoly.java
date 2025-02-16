@@ -97,7 +97,7 @@ public class FallbackItemBlockPoly implements BlockPoly {
             }
         });
 
-        PolyMcPlus.LOGGER.debug("Parsing " + leftover_states.size() + " leftover states");
+        PolyMcPlus.LOGGER.log("Parsing", leftover_states.size(), "leftover states");
 
         this.parseLeftoverStates(leftover_states, registry);
 

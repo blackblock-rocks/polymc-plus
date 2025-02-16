@@ -15,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import rocks.blackblock.bib.util.BibLog;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.FallbackItemBlockPoly;
 import rocks.blackblock.polymcplus.block.PolyPlusBlockStateProfile;
@@ -44,9 +45,9 @@ public class BlockPolyPlusGenerator {
         try {
             builder.registerBlockPoly(block, generatePoly(block, builder));
         } catch (Exception e) {
-            PolyMcPlus.LOGGER.error("Failed to generate a poly for block " + block.getTranslationKey());
+            PolyMcPlus.SIMPLE_LOGGER.error("Failed to generate a poly for block " + block.getTranslationKey());
             e.printStackTrace();
-            PolyMcPlus.LOGGER.error("Attempting to recover by using a default poly. Please report this");
+            PolyMcPlus.SIMPLE_LOGGER.error("Attempting to recover by using a default poly. Please report this");
             builder.registerBlockPoly(block, new SimpleReplacementPoly(Blocks.RED_STAINED_GLASS));
         }
     }
@@ -95,7 +96,7 @@ public class BlockPolyPlusGenerator {
         try {
             collision_shape = modded_state.getCollisionShape(fake_world, BlockPos.ORIGIN);
         } catch (Exception e) {
-            PolyMcPlus.LOGGER.warn("Failed to get collision shape for " + modded_state);
+            PolyMcPlus.SIMPLE_LOGGER.warn("Failed to get collision shape for " + modded_state);
             e.printStackTrace();
             collision_shape = VoxelShapes.UNBOUNDED;
         }
@@ -144,6 +145,27 @@ public class BlockPolyPlusGenerator {
         boolean is_full_cube = Block.isShapeFullCube(collisionShape);
         boolean tried_mushrooms = false;
         MaterialLookup.Type material_type = null;
+
+        //=== FULL BLOCKS ===
+        // Blocks that have a full top face and at least something on the bottom are considered full blocks. This works better for some blocks
+        if (is_full_cube && !isOpaque) {
+
+            if (!moddedState.isOpaque()) {
+                // Chorus flowers are full cubes & are not opaque.
+                // There are only 4 available states to reuse though
+                try {
+                    isUniqueCallback.set(true);
+                    return manager.requestBlockState(BlockStateProfile.CHORUS_FLOWER_BLOCK_PROFILE);
+                } catch (BlockStateManager.StateLimitReachedException ignored) {}
+
+                // Each chorus plant state has a slightly different collision box.
+                // But it's roughly a full cube (it's the corners that miss a few pixels of collision)
+                try {
+                    isUniqueCallback.set(true);
+                    return manager.requestBlockState(BlockStateProfile.CHORUS_PLANT_BLOCK_PROFILE);
+                } catch (BlockStateManager.StateLimitReachedException ignored) {}
+            }
+        }
 
         // == FULL BLOCKS ==
         if (is_full_cube && isOpaque) {
@@ -267,17 +289,26 @@ public class BlockPolyPlusGenerator {
 
         // Fall back to the basic PolyMc implementation
         BlockState result = BlockPolyGenerator.registerClientState(moddedState, isUniqueCallback, manager);
+        boolean force_log = PolyMcPlus.LOGGER.isEnabled();
 
         if (result == DEFAULT_STONE) {
-            PolyMcPlus.LOGGER.warn("Failed to find a Poly client state for modded block " + moddedState.getBlock());
-            PolyMcPlus.LOGGER.warn(" »» Specific modded BlockState: " + moddedState);
-            PolyMcPlus.LOGGER.warn(" »» Is full cube    : " + is_full_cube);
-            PolyMcPlus.LOGGER.warn(" »» Material type   : " + material_type);
-            PolyMcPlus.LOGGER.warn(" »» Has collisions  : " + has_collision);
-            PolyMcPlus.LOGGER.warn(" »» Wall-axis       : " + wall_axis);
-            PolyMcPlus.LOGGER.warn(" »» Tried mushrooms : " + tried_mushrooms);
-            PolyMcPlus.LOGGER.warn(" »» Is opaque       : " + isOpaque);
+            force_log = true;
+            BibLog.log("Failed to find a Poly client state for modded blockstate", moddedState);
+        } else if (force_log) {
+            BibLog.log("Used PolyMC provided state for modded blockstate", moddedState);
+        }
 
+        if (force_log) {
+            BibLog.log(" »» Chosen state    : ", result);
+            BibLog.log(" »» Is full cube    : ", is_full_cube);
+            BibLog.log(" »» Material type   : ", material_type);
+            BibLog.log(" »» Has collisions  : ", has_collision);
+            BibLog.log(" »» Wall-axis       : ", wall_axis);
+            BibLog.log(" »» Tried mushrooms : ", tried_mushrooms);
+            BibLog.log(" »» Is opaque       : ", isOpaque);
+        }
+
+        if (result == DEFAULT_STONE) {
             return null;
         }
 

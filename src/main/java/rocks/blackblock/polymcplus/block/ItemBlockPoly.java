@@ -112,7 +112,7 @@ public class ItemBlockPoly implements BlockPoly {
         JBlockState modded_block_state = PolyMcPlus.getModdedResources().getBlockState(this.block_id.getNamespace(), this.block_id.getPath());
 
         if (modded_block_state == null) {
-            PolyMcPlus.LOGGER.error("Modded block " + this.block_id + " doesn't seem to have a blockstate json");
+            PolyMcPlus.SIMPLE_LOGGER.error("Modded block " + this.block_id + " doesn't seem to have a blockstate json");
             return;
         }
 
@@ -130,7 +130,7 @@ public class ItemBlockPoly implements BlockPoly {
             JBlockStateVariant[] multipart_variants = new JBlockStateVariant[0];
 
             if (modded_variants == null || modded_variants.length == 0) {
-                PolyMcPlus.LOGGER.error("No model variants found for modded BlockState " + modded_state);
+                PolyMcPlus.SIMPLE_LOGGER.error("No model variants found for modded BlockState " + modded_state);
                 continue;
             }
 

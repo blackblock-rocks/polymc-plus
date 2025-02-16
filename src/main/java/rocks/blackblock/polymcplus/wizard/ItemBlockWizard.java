@@ -23,8 +23,8 @@ public class ItemBlockWizard extends Wizard {
         int item_count = 0;
 
         if (this.info == null) {
-            PolyMcPlus.LOGGER.info("ItemBlockWizard: ItemBlockPoly.ItemBlockStateInfo is null for state " + wizard_info.getBlockState());
-            PolyMcPlus.LOGGER.info(" -- WizardInfo is: " + wizard_info);
+            PolyMcPlus.SIMPLE_LOGGER.info("ItemBlockWizard: ItemBlockPoly.ItemBlockStateInfo is null for state " + wizard_info.getBlockState());
+            PolyMcPlus.SIMPLE_LOGGER.info(" -- WizardInfo is: " + wizard_info);
             Thread.dumpStack();
             this.batched_data = new ArrayList<>(1);
 
@@ -70,6 +70,9 @@ public class ItemBlockWizard extends Wizard {
 
     @Override
     public void removePlayer(PacketConsumer player) {
+        // @TODO: Remove these with a delay, which will prevent flashes when going
+        // from one blockstate to the next. But this is difficult, because packetconsumer
+        // instances can be reused (and thus can change, so a simple timeout call won't help)
         for (VItemDisplay.BatchedData data : this.batched_data) {
             data.removeConsumer(player);
         }
