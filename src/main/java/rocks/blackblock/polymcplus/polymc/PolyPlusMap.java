@@ -194,6 +194,7 @@ public class PolyPlusMap implements PolyMap {
      * @param    serverEntityType   The server-side entity type
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Entity> EntityPoly<T> getEntityPoly(EntityType<T> serverEntityType) {
         return (EntityPoly<T>)entityPolys.get(serverEntityType);
     }

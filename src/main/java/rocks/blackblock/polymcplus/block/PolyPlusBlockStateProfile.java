@@ -28,13 +28,19 @@ public class PolyPlusBlockStateProfile {
         );
     };
 
-    // Actual profiles
-    public static final BlockStateProfile BROWN_MUSHROOM_BLOCK_PROFILE = new BlockStateProfile("brown mushroom block", Blocks.BROWN_MUSHROOM_BLOCK, MushroomFilters.BROWN_MUSHROOM_FILTER, BROWN_MUSHROOM_ON_FIRST_REGISTER);
-    public static final BlockStateProfile RED_MUSHROOM_BLOCK_PROFILE = new BlockStateProfile("red mushroom block", Blocks.RED_MUSHROOM_BLOCK, MushroomFilters.RED_MUSHROOM_FILTER, RED_MUSHROOM_ON_FIRST_REGISTER);
-    public static final BlockStateProfile STEM_MUSHROOM_BLOCK_PROFILE = new BlockStateProfile("stem mushroom block", Blocks.MUSHROOM_STEM, MushroomFilters.STEM_MUSHROOM_FILTER, STEM_MUSHROOM_ON_FIRST_REGISTER);
+    // Block arrays for new profile method
+    private static final Block[] BROWN_MUSHROOM_BLOCKS = {Blocks.BROWN_MUSHROOM_BLOCK};
+    private static final Block[] RED_MUSHROOM_BLOCKS = {Blocks.RED_MUSHROOM_BLOCK};
+    private static final Block[] STEM_MUSHROOM_BLOCKS = {Blocks.MUSHROOM_STEM};
+    private static final Block[] TRIPWIRE_BLOCKS = {Blocks.TRIPWIRE};
 
-    public static final BlockStateProfile TRIPWIRE_THIN_PROFILE = new BlockStateProfile("thin tripwire", Blocks.TRIPWIRE, TRIPWIRE_THIN_FILTER, TRIPWIRE_ON_FIRST_REGISTER);
-    public static final BlockStateProfile TRIPWIRE_THICK_PROFILE = new BlockStateProfile("thick tripwire", Blocks.TRIPWIRE, TRIPWIRE_THICK_FILTER, TRIPWIRE_ON_FIRST_REGISTER);
+    // Actual profiles
+    public static final BlockStateProfile BROWN_MUSHROOM_BLOCK_PROFILE = BlockStateProfile.newProfile("brown mushroom block", BROWN_MUSHROOM_BLOCKS, MushroomFilters.BROWN_MUSHROOM_FILTER, BROWN_MUSHROOM_ON_FIRST_REGISTER);
+    public static final BlockStateProfile RED_MUSHROOM_BLOCK_PROFILE = BlockStateProfile.newProfile("red mushroom block", RED_MUSHROOM_BLOCKS, MushroomFilters.RED_MUSHROOM_FILTER, RED_MUSHROOM_ON_FIRST_REGISTER);
+    public static final BlockStateProfile STEM_MUSHROOM_BLOCK_PROFILE = BlockStateProfile.newProfile("stem mushroom block", STEM_MUSHROOM_BLOCKS, MushroomFilters.STEM_MUSHROOM_FILTER, STEM_MUSHROOM_ON_FIRST_REGISTER);
+
+    public static final BlockStateProfile TRIPWIRE_THIN_PROFILE = BlockStateProfile.newProfile("thin tripwire", TRIPWIRE_BLOCKS, TRIPWIRE_THIN_FILTER, TRIPWIRE_ON_FIRST_REGISTER);
+    public static final BlockStateProfile TRIPWIRE_THICK_PROFILE = BlockStateProfile.newProfile("thick tripwire", TRIPWIRE_BLOCKS, TRIPWIRE_THICK_FILTER, TRIPWIRE_ON_FIRST_REGISTER);
 
     // Full block profiles
     public static final BlockStateProfile FULL_BLOCK_MUSHROOM_PROFILE = BlockStateProfile.combine("full mushroom blocks", BROWN_MUSHROOM_BLOCK_PROFILE, RED_MUSHROOM_BLOCK_PROFILE, STEM_MUSHROOM_BLOCK_PROFILE);
@@ -51,11 +57,11 @@ public class PolyPlusBlockStateProfile {
     public static final BlockStateProfile NO_COLLISION_LOW_PROFILE = BlockStateProfile.combine("blocks with a low profile", TRIPWIRE_THIN_PROFILE, TRIPWIRE_THICK_PROFILE);
 
     // Wall states
-    public static final BlockStateProfile WALL_X_PROFILE = new BlockStateProfile("wall_x", WallFilters.WALL_BLOCKS, WallFilters.WALL_X_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
-    public static final BlockStateProfile WALL_Z_PROFILE = new BlockStateProfile("wall_z", WallFilters.WALL_BLOCKS, WallFilters.WALL_Z_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
+    public static final BlockStateProfile WALL_X_PROFILE = BlockStateProfile.newProfile("wall_x", WallFilters.WALL_BLOCKS, WallFilters.WALL_X_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
+    public static final BlockStateProfile WALL_Z_PROFILE = BlockStateProfile.newProfile("wall_z", WallFilters.WALL_BLOCKS, WallFilters.WALL_Z_FILTER, WallFilters.WALL_ON_FIRST_REGISTER);
 
     // Bed states
-    public static final BlockStateProfile BED_PROFILE = new BlockStateProfile("bed profiles", BedFilters.BED_BLOCKS, BedFilters.BED_ANY_FILTER, BedFilters.BED_ON_FIRST_REGISTER);
+    public static final BlockStateProfile BED_PROFILE = BlockStateProfile.newProfile("bed profiles", BedFilters.BED_BLOCKS, BedFilters.BED_ANY_FILTER, BedFilters.BED_ON_FIRST_REGISTER);
 
     // Soul Campfire states
     public static final BlockStateProfile SOUL_CAMPFIRE_PROFILE = BlockStateProfile.newProfile("soul campfire profiles", SoulCampfireFilters.SOUL_CAMPFIRE_BLOCKS, SoulCampfireFilters.SOUL_CAMPFIRE_FILTER, SoulCampfireFilters.SOUL_CAMPFIRE_ON_FIRST_REGISTER);

@@ -6,7 +6,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 import rocks.blackblock.polymcplus.mixin.ItemDisplayEntityAccessor;
@@ -42,7 +42,7 @@ public class VItemDisplay extends VDisplayEntity {
      *
      * @since    0.5.2
      */
-    public void setItemDisplay(PacketConsumer view, ModelTransformationMode transform) {
+    public void setItemDisplay(PacketConsumer view, ItemDisplayContext transform) {
         this.sendSingleTrackedData(view, ITEM_DISPLAY_KEY, transform.getIndex());
     }
 
@@ -192,7 +192,7 @@ public class VItemDisplay extends VDisplayEntity {
          *
          * @since    0.5.2
          */
-        public void setItemDisplay(ModelTransformationMode transform) { this.set(ITEM_DISPLAY_KEY, transform.getIndex()); }
+        public void setItemDisplay(ItemDisplayContext transform) { this.set(ITEM_DISPLAY_KEY, transform.getIndex()); }
 
         /**
          * Get the entries

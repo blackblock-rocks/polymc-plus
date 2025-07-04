@@ -4,6 +4,7 @@ package rocks.blackblock.polymcplus.server;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.theepicblock.polymc.PolyMc;
+import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
 import io.github.theepicblock.polymc.api.wizard.VItemFrame;
 import io.github.theepicblock.polymc.impl.misc.PolyDumper;
 import io.github.theepicblock.polymc.impl.misc.logging.CommandSourceLogger;
@@ -82,7 +83,11 @@ public class PolyPlusCommands {
             PolyMcPlus.releaseModdedResources();
 
             try {
-                ResourcePackGenerator.generate(PolyMcPlus.getMainMap(), "resource_polyplus", logger);
+                var pack = PolyMcPlus.getMainMap().generateResourcePack(logger);
+                if (pack == null) {
+                    throw new NullPointerException("PolyMap doesn't support resource generation");
+                }
+                ResourcePackGenerator.cleanAndWrite(pack, "resource_polyplus", logger);
 
                 BibLog.log("Generated Polyplus resource pack. Zipping...");
                 compressGameMap("resource_polyplus", "resource_polyplus.zip");
@@ -218,7 +223,7 @@ public class PolyPlusCommands {
 
             ServerCommandSource source = context.getSource();
             ServerPlayerEntity player = source.getPlayer();
-            ServerWorld world = player.getServerWorld();
+            ServerWorld world = player.getWorld();
 
             if (!player.isCreative()) {
                 source.sendError(Text.literal("You have to do this in Creative mode. This will ruin these chunks! Don't do it on live environment."));

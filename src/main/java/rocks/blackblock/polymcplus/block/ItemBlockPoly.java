@@ -3,6 +3,7 @@ package rocks.blackblock.polymcplus.block;
 import com.google.gson.JsonObject;
 import io.github.theepicblock.polymc.api.PolyRegistry;
 import io.github.theepicblock.polymc.api.block.BlockPoly;
+import io.github.theepicblock.polymc.api.item.CustomModelDataManager;
 import io.github.theepicblock.polymc.api.resource.ModdedResources;
 import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
 import io.github.theepicblock.polymc.api.resource.json.*;
@@ -146,7 +147,8 @@ public class ItemBlockPoly implements BlockPoly {
                 if (this.model_to_cmd.containsKey(model)) {
                     item_cmd = this.model_to_cmd.get(model);
                 } else {
-                    Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
+                    CustomModelDataManager cmdManager = registry.getSharedValues(CustomModelDataManager.KEY);
+                    Pair<Item,Integer> pair  = cmdManager.requestCMD();
                     Item client_item = pair.getLeft();
                     Integer cmd_value = this.id_counter++;
                     item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
@@ -169,7 +171,8 @@ public class ItemBlockPoly implements BlockPoly {
                 if (this.model_to_cmd.containsKey(model)) {
                     item_cmd = this.model_to_cmd.get(model);
                 } else {
-                    Pair<Item,Integer> pair  = registry.getCMDManager().requestCMD();
+                    CustomModelDataManager cmdManager = registry.getSharedValues(CustomModelDataManager.KEY);
+                    Pair<Item,Integer> pair  = cmdManager.requestCMD();
                     Item client_item = pair.getLeft();
                     Integer cmd_value = this.id_counter++;
                     item_cmd = new ItemCMD(client_item, block_id.getPath() + "_" + cmd_value);
