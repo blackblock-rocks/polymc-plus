@@ -431,14 +431,16 @@ public class PolyPlusRegistry extends PolyRegistry {
         JModel invisible_model = new JModelImpl();
         Map<String, String> textures = invisible_model.getTextures();
 
-        // Make the invisible model use invisible particles
-        textures.put("particle", "polymcplus:invisible");
+        // Make the invisible model use custom breaking particles
+        textures.put("particle", "polymcplus:block/breaking");
 
         // Get the "invisible" (transparent png) texture
-        TextureAsset invisible_texture = moddedResources.getTexture("polymcplus", "invisible");
+        TextureAsset breaking_texture = moddedResources.getTexture("polymcplus", "block/breaking");
+        TextureAsset invisible_texture = moddedResources.getTexture("polymcplus", "block/invisible");
 
         // Add the invisible texture to the generated resource map
-        pack.setTexture("polymcplus", "invisible", invisible_texture);
+        pack.setTexture("polymcplus", "block/invisible", invisible_texture);
+        pack.setTexture("polymcplus", "block/breaking", breaking_texture);
         pack.setModel("polymcplus", "invisible", invisible_model);
 
         Map<ItemBlockPoly.CombinedPropertyKey, BlockState> stairs_map = this.INVISIBLE_STAIRS;
