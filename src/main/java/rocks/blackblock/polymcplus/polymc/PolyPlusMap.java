@@ -42,6 +42,7 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import rocks.blackblock.bib.BibMod;
 import rocks.blackblock.bib.monitor.GlitchGuru;
+import rocks.blackblock.bib.util.BibData;
 import rocks.blackblock.bib.util.BibServer;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
@@ -66,7 +67,6 @@ public class PolyPlusMap implements PolyMap {
     /**
      * The nbt tag name that stores the original item nbt so it can be restored
      * @see PolyMap#getClientItem(ItemStack, ServerPlayerEntity, ItemLocation)
-     * @see #recoverOriginalItem(ItemStack)
      */
     private static final String ORIGINAL_ITEM_NBT = "PolyPlusOriginal";
 
@@ -147,7 +147,7 @@ public class PolyPlusMap implements PolyMap {
             ItemStack stack_to_return = ret;
 
             BibServer.executeWithoutNetworkingLogic(() -> {
-                NbtComponent.DEFAULT.with(registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
+                BibData.nbtComponentWith(NbtComponent.DEFAULT, registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
                     try {
                         stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
                     } catch (Exception e) {

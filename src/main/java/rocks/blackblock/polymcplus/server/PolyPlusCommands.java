@@ -4,7 +4,6 @@ package rocks.blackblock.polymcplus.server;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.theepicblock.polymc.PolyMc;
-import io.github.theepicblock.polymc.api.resource.PolyMcResourcePack;
 import io.github.theepicblock.polymc.api.wizard.VItemFrame;
 import io.github.theepicblock.polymc.impl.misc.PolyDumper;
 import io.github.theepicblock.polymc.impl.misc.logging.CommandSourceLogger;
@@ -171,21 +170,21 @@ public class PolyPlusCommands {
                     return 0;
                 }
 
-                entity.spawn(consumer, player.getPos());
+                entity.spawn(consumer, player.getEntityPos());
                 entity.setNoGravity(consumer, true);
 
                 if (entity instanceof VArmorStand vArmorStand) {
                     vArmorStand.makeInvisible(consumer);
                     vArmorStand.sendArmorStandFlags(consumer, false, false, false, true);
                     vArmorStand.sendSingleSlot(consumer, EquipmentSlot.HEAD, Items.STONE.getDefaultStack());
-                    vArmorStand.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                    vArmorStand.move(consumer, player.getEntityPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
                 } else if (entity instanceof VItemFrame vItemFrame) {
                     //vItemFrame.makeInvisible(consumer);
                     vItemFrame.sendItemStack(consumer, Items.STONE.getDefaultStack());
-                    vItemFrame.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                    vItemFrame.move(consumer, player.getEntityPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
                 } else if (entity instanceof VItemDisplay vItemDisplay) {
                     vItemDisplay.setItem(consumer, Items.STONE.getDefaultStack());
-                    vItemDisplay.move(consumer, player.getPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
+                    vItemDisplay.move(consumer, player.getEntityPos().add(0.1f * i, 0.1f * i, 0.1f*i), 0, 0, false);
                 }
             }
 
@@ -213,7 +212,7 @@ public class PolyPlusCommands {
             }
 
             TestVirtualEntity entity = new TestVirtualEntity(entity_type);
-            entity.spawn(consumer, player.getPos());
+            entity.spawn(consumer, player.getEntityPos());
             entity.setNoGravity(consumer, true);
 
             return Command.SINGLE_SUCCESS;
@@ -223,7 +222,7 @@ public class PolyPlusCommands {
 
             ServerCommandSource source = context.getSource();
             ServerPlayerEntity player = source.getPlayer();
-            ServerWorld world = player.getWorld();
+            ServerWorld world = player.getEntityWorld();
 
             if (!player.isCreative()) {
                 source.sendError(Text.literal("You have to do this in Creative mode. This will ruin these chunks! Don't do it on live environment."));
