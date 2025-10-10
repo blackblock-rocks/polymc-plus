@@ -17,7 +17,7 @@ import java.util.List;
  * @author   Jelle De Loecker   <jelle@elevenways.be>
  * @since    0.2.0
  */
-public class ItemBlockStateInfo {
+public class ItemBlockStateInfo implements BibLog.Argable {
 
     // The actual modded state this represents
     protected BlockState modded_state;
@@ -182,6 +182,15 @@ public class ItemBlockStateInfo {
         }
 
         return "ItemBlockStateInfo{modded_state=" + this.modded_state + ",client_items=" + stack_info + ",client_collision_state=" + this.client_collision_state + "}";
+    }
+
+    @Override
+    public BibLog.Arg toBBLogArg() {
+        return BibLog.createArg(this)
+                .add("modded_state", this.modded_state)
+                .add("client_items", this.getClientStacks())
+                .add("client_collision_state", this.client_collision_state)
+                .add("item_block_poly", this.poly);
     }
 
     /**

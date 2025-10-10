@@ -41,6 +41,7 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import rocks.blackblock.bib.BibMod;
+import rocks.blackblock.bib.monitor.GlitchGuru;
 import rocks.blackblock.bib.util.BibServer;
 import rocks.blackblock.polymcplus.PolyMcPlus;
 import rocks.blackblock.polymcplus.block.MushroomFilters;
@@ -108,6 +109,15 @@ public class PolyPlusMap implements PolyMap {
      */
     @Override
     public ItemStack getClientItem(ItemStack serverItem, @Nullable ServerPlayerEntity player, @Nullable ItemLocation location) {
+        try {
+            return internalGetClientItem(serverItem, player, location);
+        } catch (Throwable t) {
+            GlitchGuru.registerThrowable(t);
+            return new ItemStack(Items.BARRIER);
+        }
+    }
+
+    protected ItemStack internalGetClientItem(ItemStack serverItem, @Nullable ServerPlayerEntity player, @Nullable ItemLocation location) {
 
         if (serverItem == ItemStack.EMPTY || serverItem.getItem() == Items.AIR) {
             return serverItem;
@@ -138,7 +148,11 @@ public class PolyPlusMap implements PolyMap {
 
             BibServer.executeWithoutNetworkingLogic(() -> {
                 NbtComponent.DEFAULT.with(registryOps, ORIGINAL_ITEM_CODEC, Optional.of(serverItem)).result().ifPresent((nbt) -> {
-                    stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
+                    try {
+                        stack_to_return.set(DataComponentTypes.CUSTOM_DATA, nbt);
+                    } catch (Exception e) {
+                        GlitchGuru.registerThrowable(e);
+                    }
                 });
             });
         }

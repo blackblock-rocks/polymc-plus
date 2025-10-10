@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
+import rocks.blackblock.bib.util.BibLog;
 import rocks.blackblock.polymcplus.mixin.ItemDisplayEntityAccessor;
 
 import java.util.ArrayList;
@@ -22,10 +23,12 @@ import java.util.Map;
  * @author   Jelle De Loecker   <jelle@elevenways.be>
  * @since    0.5.0
  */
-public class VItemDisplay extends VDisplayEntity {
+public class VItemDisplay extends VDisplayEntity implements BibLog.Argable {
 
     public static final TrackedData<ItemStack> ITEM_KEY = ItemDisplayEntityAccessor.getITEM();
     public static final TrackedData<Byte> ITEM_DISPLAY_KEY = ItemDisplayEntityAccessor.getITEM_DISPLAY();
+    protected ItemStack itemstack = ItemStack.EMPTY;
+    protected ItemDisplayContext item_display = null;
 
     /**
      * Send a single item update
@@ -33,6 +36,7 @@ public class VItemDisplay extends VDisplayEntity {
      * @since    0.5.0
      */
     public void setItem(PacketConsumer view, ItemStack stack) {
+        this.itemstack = stack;
         this.sendSingleTrackedData(view, ITEM_KEY, stack);
     }
     
@@ -43,6 +47,7 @@ public class VItemDisplay extends VDisplayEntity {
      * @since    0.5.2
      */
     public void setItemDisplay(PacketConsumer view, ItemDisplayContext transform) {
+        this.item_display = transform;
         this.sendSingleTrackedData(view, ITEM_DISPLAY_KEY, transform.getIndex());
     }
 
@@ -54,6 +59,15 @@ public class VItemDisplay extends VDisplayEntity {
     @Override
     public EntityType<?> getEntityType() {
         return EntityType.ITEM_DISPLAY;
+    }
+
+    @Override
+    public BibLog.Arg toBBLogArg() {
+        return BibLog.createArg(this)
+            .add("id", this.getId())
+            .add("entity_type", this.getEntityType())
+            .add("itemstack", this.itemstack)
+            .add("item_display", this.item_display);
     }
 
     /**
